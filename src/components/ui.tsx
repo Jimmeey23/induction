@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import { cn } from "../utils/cn";
 import { useIsPrinting } from "./printContext";
-import { Play, Pause, RotateCcw, Eye, EyeOff, Check, X, Timer } from "lucide-react";
+import { Eye, EyeOff, Check, X } from "lucide-react";
 import type { Section } from "../data";
 
 /* ------------------------------------------------------------------ */
@@ -339,160 +339,6 @@ export function Reveal({
 }
 
 /* ------------------------------------------------------------------ */
-/* Countdown                                                           */
-/* ------------------------------------------------------------------ */
-
-function fmt(s: number) {
-  const m = Math.floor(s / 60);
-  const r = s % 60;
-  return `${m}:${r.toString().padStart(2, "0")}`;
-}
-
-export function Countdown({
-  seconds,
-  label,
-  className,
-  compact = false,
-  light = false,
-  autoStart = false,
-}: {
-  seconds: number;
-  label?: string;
-  className?: string;
-  compact?: boolean;
-  light?: boolean;
-  autoStart?: boolean;
-}) {
-  const [remaining, setRemaining] = useState(seconds);
-  const [running, setRunning] = useState(autoStart);
-  const ref = useRef<number | null>(null);
-
-  useEffect(() => {
-    setRemaining(seconds);
-    setRunning(autoStart);
-  }, [seconds, autoStart]);
-
-  useEffect(() => {
-    if (!running) return;
-    ref.current = window.setInterval(() => {
-      setRemaining((r) => {
-        if (r <= 1) {
-          setRunning(false);
-          return 0;
-        }
-        return r - 1;
-      });
-    }, 1000);
-    return () => {
-      if (ref.current) window.clearInterval(ref.current);
-    };
-  }, [running]);
-
-  const done = remaining === 0;
-  const pct = seconds > 0 ? remaining / seconds : 0;
-  const R = 22;
-  const C = 2 * Math.PI * R;
-
-  const reset = () => {
-    setRunning(false);
-    setRemaining(seconds);
-  };
-
-  if (compact) {
-    return (
-      <div
-        className={cn(
-          "inline-flex items-center gap-3 rounded-full border px-3 py-1.5",
-          light ? "border-white/15 bg-white/5 text-cream-50" : "border-ink-900/10 bg-white text-ink-900",
-          done && "border-coral-500 bg-coral-500/10",
-          className
-        )}
-      >
-        <Timer className={cn("h-4 w-4", done ? "text-coral-500 animate-pulse-soft" : light ? "text-cream-400" : "text-ink-400")} />
-        {label && <span className={cn("text-xs font-semibold", light ? "text-cream-300" : "text-ink-500")}>{label}</span>}
-        <span className={cn("font-mono text-sm font-bold tabular-nums", done && "text-coral-600")}>{done ? "Time" : fmt(remaining)}</span>
-        <div className="flex items-center gap-1">
-          <button
-            type="button"
-            onClick={() => (done ? reset() : setRunning((r) => !r))}
-            className={cn("rounded-full p-1.5 transition-colors", light ? "hover:bg-white/10" : "hover:bg-cream-200")}
-            aria-label={running ? "Pause" : "Start"}
-          >
-            {done ? <RotateCcw className="h-3.5 w-3.5" /> : running ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
-          </button>
-          {!done && remaining !== seconds && (
-            <button type="button" onClick={reset} className={cn("rounded-full p-1.5 transition-colors", light ? "hover:bg-white/10" : "hover:bg-cream-200")} aria-label="Reset">
-              <RotateCcw className="h-3.5 w-3.5" />
-            </button>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div
-      className={cn(
-        "flex items-center gap-5 rounded-2xl border p-4 md:p-5",
-        light ? "border-white/15 bg-white/5 text-cream-50" : "border-cream-300 bg-white text-ink-900 shadow-soft",
-        done && "border-coral-500",
-        className
-      )}
-    >
-      <div className="relative h-16 w-16 shrink-0">
-        <svg viewBox="0 0 56 56" className="h-16 w-16 -rotate-90">
-          <circle cx="28" cy="28" r={R} fill="none" strokeWidth="4" className={light ? "stroke-white/15" : "stroke-cream-200"} />
-          <circle
-            cx="28"
-            cy="28"
-            r={R}
-            fill="none"
-            strokeWidth="4"
-            strokeLinecap="round"
-            strokeDasharray={C}
-            strokeDashoffset={C * (1 - pct)}
-            className={cn("transition-[stroke-dashoffset] duration-1000 ease-linear", done ? "stroke-coral-500" : "stroke-coral-500")}
-          />
-        </svg>
-        <div className={cn("absolute inset-0 flex items-center justify-center font-mono text-sm font-bold tabular-nums", done && "text-coral-500 animate-pulse-soft")}>
-          {done ? "0:00" : fmt(remaining)}
-        </div>
-      </div>
-      <div className="min-w-0 flex-1">
-        <div className={cn("text-[11px] font-bold uppercase tracking-[0.18em]", light ? "text-cream-400" : "text-ink-500")}>{label ?? "Timer"}</div>
-        <div className="mt-0.5 text-sm font-semibold">{done ? "Time's up" : running ? "Running" : remaining === seconds ? `${fmt(seconds)} on the clock` : "Paused"}</div>
-      </div>
-      <div className="flex items-center gap-2">
-        <button
-          type="button"
-          onClick={() => (done ? reset() : setRunning((r) => !r))}
-          className={cn(
-            "inline-flex h-10 w-10 items-center justify-center rounded-full transition-colors",
-            light ? "bg-cream-50 text-ink-900 hover:bg-white" : "bg-ink-900 text-cream-50 hover:bg-ink-700"
-          )}
-          aria-label={running ? "Pause" : "Start"}
-        >
-          {done ? <RotateCcw className="h-4 w-4" /> : running ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 translate-x-px" />}
-        </button>
-        {!done && (
-          <button
-            type="button"
-            onClick={reset}
-            className={cn(
-              "inline-flex h-10 w-10 items-center justify-center rounded-full border transition-colors",
-              light ? "border-white/20 hover:bg-white/10" : "border-ink-900/15 hover:bg-cream-200"
-            )}
-            aria-label="Reset"
-          >
-            <RotateCcw className="h-4 w-4" />
-          </button>
-        )}
-      </div>
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
 /* Lists                                                               */
 /* ------------------------------------------------------------------ */
 
@@ -596,7 +442,6 @@ export function ModuleHeader({
             {section.num !== undefined && <Chip tone="dark">Module {String(section.num).padStart(2, "0")}</Chip>}
             {section.kind === "toolkit" && <Chip tone="dark">Toolkit · After the session</Chip>}
             {section.kind === "practice" && <Chip tone="dark">Practice</Chip>}
-            {section.time && <Chip>{section.time}</Chip>}
             {section.format && <Chip tone="coral">{section.format}</Chip>}
           </div>
           <Display as="h1" size="lg">
@@ -604,11 +449,6 @@ export function ModuleHeader({
           </Display>
           {subtitle && <Lede>{subtitle}</Lede>}
         </div>
-        {section.minutes && (
-          <div className="w-full sm:w-auto">
-            <Countdown seconds={section.minutes * 60} label={`Module clock · ${section.minutes} min`} />
-          </div>
-        )}
       </div>
       {children}
     </header>

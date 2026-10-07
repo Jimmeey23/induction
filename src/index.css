@@ -149,3 +149,36 @@ body {
     background: #fff;
   }
 }
+
+/* Member-profile practice: a compact directory beside an editorial record. */
+.member-profiles .profile-record {
+  box-shadow: 0 2px 4px rgb(11 11 12 / 3%), 0 16px 40px -24px rgb(11 11 12 / 24%);
+}
+.member-profiles .profile-record > div:first-child {
+  background: var(--color-ink-900);
+  border-color: var(--color-ink-900);
+}
+.member-profiles .profile-record > div:first-child > div:last-child > span:last-child {
+  color: var(--color-cream-200);
+  font-size: 9px;
+  letter-spacing: .12em;
+}
+.member-profiles .profile-record dl > div {
+  grid-template-columns: 100px minmax(0, 1fr);
+}
+.member-profiles button:focus-visible,
+.member-profiles input:focus-visible {
+  outline: 2px solid var(--color-coral-600);
+  outline-offset: 3px;
+}
+@media (max-width: 400px) {
+  .member-profiles .profile-record dl > div {
+    grid-template-columns: 80px minmax(0, 1fr);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .member-profiles *, .member-profiles *::before, .member-profiles *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

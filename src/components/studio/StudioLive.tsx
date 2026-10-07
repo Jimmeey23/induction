@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Play, Square, Lock, Unlock, Check, Undo2, AlertCircle, HelpCircle, Minus, Plus, Siren, Footprints, MessageCircleQuestion, Ban, Flag, Bell, ListChecks, Ear } from "lucide-react";
+import { Play, Square, Lock, Unlock, Check, Undo2, AlertCircle, HelpCircle, Minus, Plus, Siren, Footprints, MessageCircleQuestion, Ban, Flag, Bell, Ear } from "lucide-react";
 import { firstSeven, crimeList, fiveCs, type Rating } from "../../lib/scenarios";
 import { cn } from "../../utils/cn";
 import { Eyebrow } from "../ui";
@@ -137,7 +137,7 @@ function AssociateView({ s, dispatch }: { s: Session; dispatch: (a: Action) => v
 
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <Eyebrow tone="coral">The First 7 · tap each step as you begin it</Eyebrow>
+          <Eyebrow tone="coral">The seven-step induction · tap each step as you begin it</Eyebrow>
           <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-ink-400">{new Set(s.stepLog.map((e) => e.step)).size}/7 covered</span>
         </div>
         <ol className="space-y-2">
@@ -403,60 +403,47 @@ function ObserverView({ s, dispatch }: { s: Session; dispatch: (a: Action) => vo
             </div>
           </div>
 
-          {/* Curveballs */}
+          {/* Manual interruptions */}
           <div className="rounded-3xl border border-cream-200 bg-white p-5 shadow-soft">
-            <div className="flex items-center justify-between">
-              <Eyebrow tone="coral">Curveballs</Eyebrow>
-              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-ink-400">{upcoming.length} still to come</span>
-            </div>
+            <Eyebrow tone="coral">Choose an interruption</Eyebrow>
+            <p className="mt-1 text-xs text-ink-500">Trigger one when it feels natural to challenge the conversation.</p>
             <ul className="mt-3 space-y-2">
-              {s.fired.length === 0 && <li className="text-sm text-ink-500">None fired yet{upcoming[0] ? ` — next around ${fmt(upcoming[0].at)}` : ""}.</li>}
-              {s.fired.map((f) => (
-                <li key={f.id} className="flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-cream-100 px-4 py-3 text-sm">
-                  <span className="min-w-0">
-                    <span className="font-mono text-[11px] text-ink-400">{fmt(f.at)}</span> <span className="font-medium">{f.kind === "event" ? f.text : `“${f.text}”`}</span>
-                    {!f.delivered && <span className="ml-2 text-[10px] font-bold uppercase text-coral-600">not yet said</span>}
-                  </span>
-                  <span className="flex gap-1">
-                    {[true, false].map((h) => (
-                      <button
-                        key={String(h)}
-                        type="button"
-                        onClick={() => dispatch({ type: "handled", id: f.id, handled: f.handled === h ? null : h })}
-                        className={cn("rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider transition-colors", f.handled === h ? (h ? "bg-sage-700 text-white" : "bg-coral-500 text-white") : "bg-white text-ink-600 shadow-soft hover:bg-cream-200")}
-                      >
-                        {h ? "Handled" : "Struggled"}
-                      </button>
-                    ))}
-                  </span>
+              {available.length === 0 && <li className="text-sm text-ink-500">No interruptions remain.</li>}
+              {available.map((line) => (
+                <li key={line.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-cream-100 px-4 py-3 text-sm">
+                  <span className="min-w-0">{line.kind === "event" ? line.text : `“${line.text}”`}</span>
+                  <button
+                    type="button"
+                    disabled={!s.started}
+                    onClick={() => dispatch({ type: "fire", line })}
+                    className="shrink-0 rounded-full bg-ink-900 px-4 py-2 text-xs font-bold text-cream-50 hover:bg-ink-700 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Trigger now
+                  </button>
                 </li>
               ))}
             </ul>
-            {upcoming.length > 0 && (
-              <div className="mt-3 rounded-2xl border border-dashed border-ink-900/15 p-3 text-xs text-ink-500">
-                <span className="font-bold uppercase tracking-wider text-[10px]">Next up · </span>
-                {fmt(upcoming[0].at)} — {upcoming[0].kind === "event" ? upcoming[0].text : `“${upcoming[0].text}”`}
-              </div>
+            {s.fired.length > 0 && (
+              <ul className="mt-4 space-y-2 border-t border-cream-200 pt-4">
+                {s.fired.map((f) => (
+                  <li key={f.id} className="flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-cream-100 px-4 py-3 text-sm">
+                    <span className="min-w-0">{f.kind === "event" ? f.text : `“${f.text}”`}</span>
+                    <span className="flex gap-1">
+                      {[true, false].map((handled) => (
+                        <button
+                          key={String(handled)}
+                          type="button"
+                          onClick={() => dispatch({ type: "handled", id: f.id, handled: f.handled === handled ? null : handled })}
+                          className={cn("rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider transition-colors", f.handled === handled ? (handled ? "bg-sage-700 text-white" : "bg-coral-500 text-white") : "bg-white text-ink-600 shadow-soft hover:bg-cream-200")}
+                        >
+                          {handled ? "Handled" : "Struggled"}
+                        </button>
+                      ))}
+                    </span>
+                  </li>
+                ))}
+              </ul>
             )}
-          </div>
-
-          {/* Timeline */}
-          <div className="rounded-3xl border border-cream-200 bg-white p-5 shadow-soft">
-            <div className="flex items-center gap-2">
-              <ListChecks className="h-4 w-4 text-ink-400" />
-              <Eyebrow>Live timeline</Eyebrow>
-            </div>
-            <ol className="mt-3 max-h-64 space-y-1.5 overflow-y-auto text-sm scrollbar-thin">
-              {events.length === 0 && <li className="text-ink-500">Waiting for the induction to start…</li>}
-              {events.map((e, i) => (
-                <li key={i} className="flex items-center gap-3">
-                  <span className="w-10 font-mono text-[11px] text-ink-400">{fmt(e.at)}</span>
-                  <span className={cn("h-2 w-2 rounded-full", e.kind === "step" ? "bg-ink-900" : e.kind === "truth" ? "bg-sage-500" : e.kind === "curve" ? "bg-coral-500" : "bg-gold-500")} />
-                  <span className="text-ink-800">{e.text}</span>
-                </li>
-              ))}
-            </ol>
-            <div className="mt-2 text-right font-mono text-[11px] text-ink-400">now {fmt(elapsed)}</div>
           </div>
         </div>
 

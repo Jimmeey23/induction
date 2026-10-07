@@ -69,7 +69,7 @@ export function RolePlayStudio({ section }: { section: Section }) {
       <ModuleHeader section={section} title={<>Role-Play <span className="italic font-light">Studio</span></>} subtitle="Real member records. A secret persona. Hidden truths that only surface if the associate asks the right question. One device, three screens.">
         <div className="mt-6 grid gap-3 sm:grid-cols-3">
           {[
-            [UserRound, "Associate", "Sees only the CRM profile. Runs the First 7 and taps each step as they go."],
+            [UserRound, "Associate", "Sees only the CRM profile. Follows the seven-step induction and taps each step as they go."],
             [Users, "Client", "Sees the secret persona, the hidden truths and pressure lines. Reveals only what's earned."],
             [Eye, "Observer", "Counts open vs closed questions, spots crimes, rates the 5 Cs, triggers interruptions."],
           ].map(([I, t, d]) => {

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Menu, X, Play, Pause, RotateCcw, Keyboard, FileDown, Mic, MicOff, Loader2 } from "lucide-react";
-import { sections, SESSION_MINUTES } from "./data";
+import { ChevronLeft, ChevronRight, Menu, X, Keyboard, FileDown, Mic, MicOff, Loader2 } from "lucide-react";
+import { sections } from "./data";
 import { cn } from "./utils/cn";
 import { Overview } from "./components/Overview";
 import { Module1, Module2, Module3 } from "./components/Modules1to3";
@@ -13,78 +13,6 @@ import { RolePlayStudio } from "./components/studio/RolePlayStudio";
 import { MemberProfiles } from "./components/MemberProfiles";
 import { SpeakerNotes } from "./components/SpeakerNotes";
 import { PrintDoc } from "./components/PrintDoc";
-
-/* ------------------------------------------------------------------ */
-/* Session clock (elapsed stopwatch against the 2-hour plan)           */
-/* ------------------------------------------------------------------ */
-
-function fmtClock(totalSec: number) {
-  const h = Math.floor(totalSec / 3600);
-  const m = Math.floor((totalSec % 3600) / 60);
-  const s = totalSec % 60;
-  return `${h}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
-}
-
-function SessionClock({ onJump }: { onJump: (id: string) => void }) {
-  const [elapsed, setElapsed] = useState(0);
-  const [running, setRunning] = useState(false);
-  const ref = useRef<number | null>(null);
-
-  useEffect(() => {
-    if (!running) return;
-    ref.current = window.setInterval(() => setElapsed((e) => e + 1), 1000);
-    return () => {
-      if (ref.current) window.clearInterval(ref.current);
-    };
-  }, [running]);
-
-  const minutes = elapsed / 60;
-  const scheduled = useMemo(() => {
-    const mods = sections.filter((s) => s.kind === "module");
-    return [...mods].reverse().find((m) => (m.startMin ?? 0) <= minutes) ?? mods[0];
-  }, [minutes]);
-  const pct = Math.min(100, (minutes / SESSION_MINUTES) * 100);
-  const over = minutes > SESSION_MINUTES;
-
-  return (
-    <div className="flex items-center gap-3">
-      <div className="hidden md:flex flex-col items-end">
-        <button type="button" onClick={() => onJump(scheduled.id)} className="text-[10px] font-bold uppercase tracking-[0.2em] text-ink-500 hover:text-coral-600 transition-colors">
-          On schedule · Module {scheduled.num}
-        </button>
-        <div className="mt-1 h-1 w-32 overflow-hidden rounded-full bg-cream-300">
-          <div className={cn("h-full transition-all", over ? "bg-coral-500" : "bg-ink-900")} style={{ width: `${pct}%` }} />
-        </div>
-      </div>
-      <div className={cn("flex items-center gap-1 rounded-full border bg-white pl-3 pr-1 py-1", over ? "border-coral-500" : "border-cream-300")}>
-        <span className={cn("font-mono text-sm font-bold tabular-nums", over && "text-coral-600")}>{fmtClock(elapsed)}</span>
-        <span className="text-[10px] font-bold text-ink-400 mr-1">/ 2:00:00</span>
-        <button
-          type="button"
-          onClick={() => setRunning((r) => !r)}
-          className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-ink-900 text-cream-50 hover:bg-ink-700 transition-colors"
-          aria-label={running ? "Pause session clock" : "Start session clock"}
-        >
-          {running ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5 translate-x-px" />}
-        </button>
-        {elapsed > 0 && (
-          <button
-            type="button"
-            onClick={() => {
-              setRunning(false);
-              setElapsed(0);
-            }}
-            className="inline-flex h-7 w-7 items-center justify-center rounded-full hover:bg-cream-200 transition-colors"
-            aria-label="Reset session clock"
-          >
-            <RotateCcw className="h-3.5 w-3.5" />
-          </button>
-        )}
-      </div>
-    </div>
-  );
-}
-
 
 /* ------------------------------------------------------------------ */
 /* PDF export (renders the whole deck, then hands it to the printer)   */
@@ -285,7 +213,7 @@ export default function App() {
         <div className="mt-5 mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.22em] text-ink-400">The session</div>
         <div className="space-y-0.5">
           {modules.map((m) => (
-            <NavItem key={m.id} active={view === m.id} onClick={() => go(m.id)} num={m.num} label={m.label} meta={m.time} />
+            <NavItem key={m.id} active={view === m.id} onClick={() => go(m.id)} num={m.num} label={m.label} meta={m.format} />
           ))}
         </div>
 
@@ -345,7 +273,6 @@ export default function App() {
               <div className="min-w-0">
                 <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-ink-500">
                   {section.kind === "module" ? `Module ${section.num} of 10` : section.kind === "toolkit" ? "Toolkit" : section.kind === "practice" ? "Practice" : "Session"}
-                  {section.time && <span className="ml-2 text-ink-400">· {section.time}</span>}
                 </div>
                 <div className="truncate font-display text-base md:text-lg font-medium tracking-tight">{section.label}</div>
               </div>
@@ -365,7 +292,6 @@ export default function App() {
                 <span className="hidden sm:inline">Notes</span>
               </button>
               <ExportMenu busy={printing !== null} onExport={(withNotes) => setPrinting({ withNotes })} />
-              <SessionClock onJump={go} />
             </div>
           </div>
           {/* Progress */}

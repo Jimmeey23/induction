@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Shuffle, RotateCcw, MessageSquare, Zap, Plus, X, Brain, Ear } from "lucide-react";
 import type { Section } from "../data";
 import { cn } from "../utils/cn";
-import { ModuleHeader, Card, Eyebrow, Display, Quote, Countdown, Block, Lede, Statement, BigQuestion, Chip } from "./ui";
+import { ModuleHeader, Card, Eyebrow, Display, Quote, Block, Lede, Statement, BigQuestion, Chip } from "./ui";
 
 /* ================================================================== */
 /* MODULE 9                                                            */
@@ -54,7 +54,7 @@ export function Module9({ section, go }: { section: Section; go?: (id: string) =
 
   return (
     <div className="space-y-14 md:space-y-20">
-      <ModuleHeader section={section} title="Curveball Challenge" subtitle="Now it gets chaotic. One person starts an induction. Every 45–60 seconds, a curveball lands." />
+      <ModuleHeader section={section} title="Curveball Challenge" subtitle="One person starts an induction while an observer introduces unexpected client questions and studio interruptions." />
 
       <Block>
         <div className="grain relative overflow-hidden rounded-3xl bg-ink-950 p-6 md:p-10 text-cream-50">
@@ -102,7 +102,6 @@ export function Module9({ section, go }: { section: Section; go?: (id: string) =
                   <p className="font-display text-2xl font-light text-cream-400">Draw a curveball when the induction is underway.</p>
                 )}
               </div>
-              {current && <Countdown key={round} seconds={60} label="Until the next curveball" light autoStart />}
             </div>
           </div>
         </div>

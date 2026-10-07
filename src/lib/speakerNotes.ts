@@ -7,8 +7,6 @@
 export interface SpeakerNote {
   /** What this part of the session is for, in one line. */
   purpose: string;
-  /** How to spend the minutes. */
-  timing?: string[];
   /** Lines the trainer can say more or less verbatim. */
   say?: string[];
   /** How to run the activity / what to do on screen. */
@@ -21,17 +19,15 @@ export interface SpeakerNote {
 
 export const speakerNotes: Record<string, SpeakerNote> = {
   overview: {
-    purpose: "Set the contract for the two hours before anyone feels lectured at.",
-    timing: ["2 min, before the clock starts. Do not teach anything here."],
+    purpose: "Set the contract for the session before anyone feels lectured at.",
     say: [
-      "Today is not a policy briefing. It's two hours on one skill: the first seven minutes with a new client.",
+      "Today is not a policy briefing. It's one skill: helping a new client feel welcome and supported.",
       "You'll be on your feet, in pairs, role-playing with real member records. Nothing here is theory.",
       "By the end you'll each leave with one thing you'll do differently in your very next induction.",
     ],
     run: [
       "Read the outcomes list out loud quickly — don't dwell, it's a map not a lesson.",
-      "Point at the run of show so the room can see there's a break in the rhythm every ten minutes.",
-      "Start the session clock in the header when you move to Module 1.",
+      "Point out the range of modules and explain how discussion, demonstration and practice will work together.",
     ],
     watch: ["If people arrive with laptops open, ask them to close them — this session is spoken, not read."],
     transition: "Before we talk about how to do an induction, let's agree on why it exists at all.",
@@ -39,7 +35,6 @@ export const speakerNotes: Record<string, SpeakerNote> = {
 
   m1: {
     purpose: "Make the room feel the client's confusion so the induction stops being a form-filling task.",
-    timing: ["3 min on Question 1", "3 min on Question 2", "4 min on the reframe and the 'sale has happened' point"],
     say: [
       "Think about somebody walking into Physique 57 for their first class. What are all the things they DON'T know that we know?",
       "Keep going — the list is longer than you think.",
@@ -54,39 +49,37 @@ export const speakerNotes: Record<string, SpeakerNote> = {
       "Somebody will answer operationally ('they don't know the cancellation window'). Push for the feeling underneath it.",
       "Don't let this become a complaint session about the front desk. Keep it on the client.",
     ],
-    transition: "So if that's the problem — what does 'solved' actually look like? Seven minutes from now, what should they feel?",
+    transition: "So if that's the problem — what does 'solved' actually look like? How should a client feel after their induction?",
   },
 
   m2: {
     purpose: "Replace 'did I cover everything?' with 'how does the client feel?' as the measure of a good induction.",
-    timing: ["2 min silent writing (use the on-screen timer)", "4 min gathering answers", "4 min on the principle"],
     say: [
-      "Post-it or paper. Two minutes, on your own, no talking: what should a client feel after seven minutes with us?",
+      "Post-it or paper. On your own, no talking: what should a client feel after their first induction with us?",
       "One word or one line each. Don't write what you'd say — write what they'd feel.",
     ],
     run: [
-      "Start the 2-minute countdown on screen and stay quiet for the full two minutes. The silence is the exercise.",
+      "Give everyone quiet space to write before gathering answers. The silence is the exercise.",
       "Collect every answer around the room before revealing the six feelings. Cluster them out loud as you go.",
       "Then deliver Training Principle № 1: we don't measure an induction by information delivered, we measure it by how the client feels.",
     ],
     watch: [
       "If answers drift into tasks ('they know the lockers'), ask: and what does that make them feel?",
-      "Protect the two minutes of silence — people will want to talk to each other. That's the whole point of doing it alone.",
+      "Protect the quiet reflection — people will want to talk to each other. That's the whole point of doing it alone.",
     ],
     transition: "That's the target. Now here's the only framework you have to remember to hit it.",
   },
 
   m3: {
-    purpose: "Teach The First 7 as one conversation in seven moves — and prove it fits in seven minutes.",
-    timing: ["6 min teaching the seven moves", "7 min live demonstration", "2 min tally debrief"],
+    purpose: "Teach the seven-step induction as one conversation.",
     say: [
       "Seven moves, one conversation. Not a script — an order.",
-      "The bar widths on screen are proportional to time. Notice how little of it is you talking about policies.",
+      "Notice how little of the conversation is you talking about policies.",
       "You already have CRM information. Don't repeat it back to them — use it to ask better questions.",
     ],
     run: [
       "Walk the seven moves once, quickly. Resist explaining each one in depth — Modules 4 to 6 do that.",
-      "Then do the live demonstration yourself with a volunteer as the client. Run the on-screen clock so the room sees seven minutes is genuinely enough.",
+      "Then do the live demonstration yourself with a volunteer as the client, modelling a natural and client-led conversation.",
       "Ask the room to keep a tally while they watch: how many questions did the associate ask vs. how many statements did they make?",
       "Debrief on the tally number, not on style.",
     ],
@@ -99,15 +92,14 @@ export const speakerNotes: Record<string, SpeakerNote> = {
 
   m4: {
     purpose: "Turn CRM fields into questions. This is the technical core of the session.",
-    timing: ["1 min silent profile read", "4 min on first questions", "6 min on Brooke's two fields", "5 min on the six verbs and the five things to scan for", "4 min optional live member record"],
     say: [
-      "Sixty seconds. Read Brooke's profile. Don't plan a speech — plan a question.",
+      "Read Brooke's profile. Don't plan a speech — plan a question.",
       "Fitness goal: get fit for a July 2026 wedding. What does that actually tell you? Almost nothing — until you ask.",
       "Health notes: asthma, limits intense cardio. Knowing is the start. Asking is the skill.",
       "Don't assume from data. Explore it.",
     ],
     run: [
-      "Run the 60-second profile timer and keep the room silent.",
+      "Give the group a quiet moment to review the profile before asking for their observations.",
       "Take first questions around the room before revealing the breakthrough question.",
       "Work the two Brooke fields slowly — this is the moment the session clicks for most people.",
       "Leave the six verbs on screen while you work. Keep the five things to scan for visible at the end.",
@@ -123,15 +115,14 @@ export const speakerNotes: Record<string, SpeakerNote> = {
 
   m5: {
     purpose: "Build the reflex of asking one more question before recommending anything.",
-    timing: ["3 min setting up the temptation", "7 min rapid-fire around the room"],
     say: [
       "Someone says 'I want to lose weight.' The temptation is to recommend. Resist it.",
       "One level deeper. Before you recommend anything, ask one more useful question.",
       "No recommendation allowed. If a recommendation comes out of your mouth, you're out.",
     ],
     run: [
-      "Draw statements on screen and go around the room at speed — five seconds per person, use the timer.",
-      "Keep the energy high and the pace unforgiving. Momentum matters more than polish here.",
+      "Draw statements on screen and invite the group to offer useful follow-up questions.",
+      "Keep the energy high. Momentum matters more than polish here.",
       "Call out the best follow-ups as you hear them and make the room repeat them.",
     ],
     watch: [
@@ -143,7 +134,6 @@ export const speakerNotes: Record<string, SpeakerNote> = {
 
   m6: {
     purpose: "Fix the three places associates sound robotic: policies, formats and recommendations.",
-    timing: ["3 min policies", "4 min class formats", "3 min recommendations"],
     say: [
       "Policies should sound like care, not like a contract.",
       "Explain the formats that are relevant to this client first — the others get one line.",
@@ -163,7 +153,6 @@ export const speakerNotes: Record<string, SpeakerNote> = {
 
   m7: {
     purpose: "Release the tension and let the team name bad practice themselves, out loud.",
-    timing: ["1 min setup", "5 min performance", "4 min debrief"],
     say: [
       "One client, one associate, everyone else is a judge. Associate: your mission is to commit as many crimes on that list as possible.",
       "Everyone else — every time you see poor servicing, call it out. Loudly.",
@@ -176,43 +165,41 @@ export const speakerNotes: Record<string, SpeakerNote> = {
     ],
     watch: [
       "Keep it about behaviour, never about a specific colleague's real induction. Don't let it turn personal.",
-      "Cut the performance at five minutes even if it's going well — Module 8 needs its full twenty.",
+      "Wrap the performance before the debrief so the group has room to reflect.",
     ],
     transition: "That's how not to do it. Now the real thing, in pairs.",
   },
 
   m8: {
     purpose: "Full induction practice against different personalities, with structured observation.",
-    timing: ["2 min briefing and pairing", "7 min round one", "4 min feedback", "7 min round two (swap roles)"],
     say: [
       "In pairs: one Associate, one Client. Associates read only the CRM. Clients read your brief privately — do not show it.",
-      "Seven minutes. Full induction, start to finish.",
+      "Practise the full induction from start to finish.",
       "Observers: five things only. Nobody scores personality.",
     ],
     run: [
       "Open the Role-Play Studio for live rounds — it auto-matches a persona to a real record and runs the debrief.",
       "Pair deliberately: put the quiet people with the patient people.",
-      "Run the on-screen 7-minute clock for every round so pairs stay in sync.",
+      "Let each pair move through the conversation naturally, then swap roles.",
       "Swap roles for round two. Everyone must sit in the client's chair at least once.",
     ],
     watch: [
       "Circulate constantly and listen for the first question — that's where you'll coach.",
       "Keep feedback on the 5 Cs. Stop any feedback that starts with 'I would have…'.",
-      "This module will overrun if you let it. Watch the clock from the start.",
+      "Make sure each person has a chance to practise as both associate and client.",
     ],
     transition: "Real inductions don't stay this tidy. Let's add the interruptions.",
   },
 
   m9: {
     purpose: "Build composure — hold the thread of the induction while things go wrong around you.",
-    timing: ["1 min setup", "7 min of curveballs", "2 min on 'let me find out for you'"],
     say: [
-      "One person starts an induction. Every 45 to 60 seconds, a curveball lands — a client line or a studio interruption.",
+      "One person starts an induction. The observer introduces client lines or studio interruptions when they feel natural.",
       "The challenge isn't answering the curveball. It's getting back to where you were.",
       "'That's a great question — let me find out for you and come back.' That is infinitely better than confidently inventing an answer.",
     ],
     run: [
-      "Draw curveballs on screen once the induction is underway, and let the timer dictate the next one.",
+      "Draw curveballs on screen once the induction is underway, and let the conversation guide when the next one lands.",
       "Swap the associate every two or three curveballs so pressure is shared.",
       "Finish by making the whole room say the 'let me find out for you' line out loud.",
     ],
@@ -226,7 +213,6 @@ export const speakerNotes: Record<string, SpeakerNote> = {
 
   m10: {
     purpose: "Prove the gap between what we say and what the client retains.",
-    timing: ["3 min final induction", "2 min memory capture and close"],
     say: [
       "One final induction. Then I'm only going to ask the client one question.",
       "What do you remember?",
@@ -234,7 +220,7 @@ export const speakerNotes: Record<string, SpeakerNote> = {
     ],
     run: [
       "Capture both lists live on screen: what the client remembered, and what the associate actually said.",
-      "Let the room look at the difference in silence for a few seconds before you say anything.",
+      "Give the room a moment to reflect on the difference before you say anything.",
       "Close on the final line and hand over to the CRM Loop.",
     ],
     watch: [
@@ -257,7 +243,7 @@ export const speakerNotes: Record<string, SpeakerNote> = {
     purpose: "Real CRM records for the Module 4 exercise and for warm-ups.",
     run: [
       "Put a record on screen. Ask: what do you know, and what would you ask?",
-      "Good for a five-minute warm-up at the start of any future shift briefing.",
+      "Good for a quick warm-up at the start of any future shift briefing.",
     ],
   },
 

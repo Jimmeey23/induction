@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { sections, outcomes, runOfShow, SESSION_MINUTES } from "../data";
+import { sections, outcomes, runOfShow } from "../data";
 import { PrintContext } from "./printContext";
 import { SpeakerNotes } from "./SpeakerNotes";
 import { Overview } from "./Overview";
@@ -48,7 +48,7 @@ function Cover() {
           <span className="text-coral-500">→ First Connection</span>
         </h1>
         <p className="mt-6 max-w-xl text-lg text-ink-600">
-          Complete trainer pack — all ten modules, the toolkit, and speaker notes for every section. {SESSION_MINUTES} minutes.
+          Complete trainer pack — all ten modules, the toolkit, and speaker notes for every section.
         </p>
 
         <div className="mt-14 grid gap-10 md:grid-cols-2">
@@ -68,11 +68,9 @@ function Cover() {
             <ul className="mt-4 space-y-1.5 text-sm">
               {runOfShow.map((m) => (
                 <li key={m.id} className="flex gap-3 border-b border-ink-900/10 pb-1.5">
-                  <span className="w-24 shrink-0 font-mono text-xs text-ink-500">{m.time}</span>
                   <span className="flex-1">
                     {m.num}. {m.label}
                   </span>
-                  <span className="text-xs text-ink-400">{m.minutes}m</span>
                 </li>
               ))}
             </ul>

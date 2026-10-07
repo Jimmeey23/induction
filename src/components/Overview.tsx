@@ -1,4 +1,4 @@
-import { ArrowRight, Clock, Users, Sparkles, Check } from "lucide-react";
+import { ArrowRight, Users, Sparkles, Check } from "lucide-react";
 import { outcomes, runOfShow } from "../data";
 import { Eyebrow, Display, Card, Chip } from "./ui";
 
@@ -24,9 +24,6 @@ export function Overview({ go }: { go: (id: string) => void }) {
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Chip tone="light" className="py-2 px-4 text-sm">
-              <Clock className="h-4 w-4 text-coral-400" /> 2 hours
-            </Chip>
             <Chip tone="light" className="py-2 px-4 text-sm">
               <Users className="h-4 w-4 text-coral-400" /> Sales & Client Servicing Associates
             </Chip>
@@ -94,15 +91,14 @@ export function Overview({ go }: { go: (id: string) => void }) {
       <section className="space-y-8">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="max-w-2xl space-y-3">
-            <Eyebrow tone="coral">The 2-hour run of show</Eyebrow>
+            <Eyebrow tone="coral">Training modules</Eyebrow>
             <Display size="md">Ten modules. One conversation.</Display>
           </div>
           <p className="text-sm text-ink-500">Select any module to open it.</p>
         </div>
 
         <Card tone="light" className="p-0 md:p-0 overflow-hidden">
-          <div className="hidden md:grid grid-cols-[120px_1fr_260px] gap-4 border-b border-cream-200 bg-cream-100/70 px-6 py-3 text-[11px] font-bold uppercase tracking-[0.2em] text-ink-500">
-            <span>Time</span>
+          <div className="hidden md:grid grid-cols-[1fr_260px] gap-4 border-b border-cream-200 bg-cream-100/70 px-6 py-3 text-[11px] font-bold uppercase tracking-[0.2em] text-ink-500">
             <span>Module</span>
             <span>Format</span>
           </div>
@@ -112,9 +108,8 @@ export function Overview({ go }: { go: (id: string) => void }) {
                 <button
                   type="button"
                   onClick={() => go(s.id)}
-                  className="group grid w-full grid-cols-1 gap-2 px-6 py-4 text-left transition-colors hover:bg-cream-100 md:grid-cols-[120px_1fr_260px] md:items-center md:gap-4"
+                  className="group grid w-full grid-cols-1 gap-2 px-6 py-4 text-left transition-colors hover:bg-cream-100 md:grid-cols-[1fr_260px] md:items-center md:gap-4"
                 >
-                  <span className="font-mono text-sm font-bold tabular-nums text-ink-900">{s.time}</span>
                   <span className="flex items-center gap-3">
                     <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-ink-900 font-display text-xs text-cream-50 group-hover:bg-coral-500 transition-colors">
                       {s.num}
@@ -140,7 +135,7 @@ export function Overview({ go }: { go: (id: string) => void }) {
                 Practice · Modules 8 & 9
               </Eyebrow>
               <div className="mt-2 font-display text-2xl md:text-3xl font-light tracking-tight">Role-Play Studio</div>
-              <p className="mt-1 text-sm text-white/85">Real member records, secret personas, hidden truths, timed curveballs and an automatic debrief.</p>
+              <p className="mt-1 text-sm text-white/85">Real member records, secret personas, hidden truths, observer-triggered interruptions and a guided debrief.</p>
             </div>
           </button>
           <button type="button" onClick={() => go("members")} className="group rounded-3xl border border-cream-200 bg-white p-6 text-left shadow-soft transition-all hover:-translate-y-0.5 hover:border-ink-900/30">
@@ -150,28 +145,6 @@ export function Overview({ go }: { go: (id: string) => void }) {
           </button>
         </div>
 
-        {/* Timeline bar */}
-        <div className="space-y-2">
-          <div className="flex h-4 w-full overflow-hidden rounded-full bg-cream-200">
-            {runOfShow.map((s, i) => (
-              <button
-                key={s.id}
-                type="button"
-                title={`${s.time} · ${s.label}`}
-                onClick={() => go(s.id)}
-                style={{ width: `${((s.minutes ?? 0) / 120) * 100}%` }}
-                className={`h-full border-r border-cream-100 transition-opacity hover:opacity-80 ${i % 2 === 0 ? "bg-ink-900" : "bg-coral-500"}`}
-              />
-            ))}
-          </div>
-          <div className="flex justify-between text-[11px] font-bold uppercase tracking-[0.2em] text-ink-400">
-            <span>0:00</span>
-            <span>0:30</span>
-            <span>1:00</span>
-            <span>1:30</span>
-            <span>2:00</span>
-          </div>
-        </div>
       </section>
     </div>
   );

@@ -159,7 +159,7 @@ export function CheatSheet({ section }: { section: Section }) {
           <div className="p-7 md:p-10 space-y-6">
             <div>
               <Eyebrow tone="coral">During the induction</Eyebrow>
-              <div className="mt-2 font-display text-3xl font-medium uppercase tracking-tight">The First 7</div>
+              <div className="mt-2 font-display text-3xl font-medium uppercase tracking-tight">The 7-Step Framework</div>
             </div>
             <ol className="grid gap-2 sm:grid-cols-2">
               {[
@@ -228,7 +228,7 @@ const nevers = [
   "Recommend before understanding.",
   "Recite every policy.",
   "Explain every class identically to every client.",
-  "Talk for five uninterrupted minutes.",
+  "Monologue through the induction without checking in.",
   "Treat the studio tour like pointing out emergency exits.",
   "End without a next step.",
   "Pretend to know an answer when we don't.",
@@ -291,21 +291,21 @@ export function Closing({ section, go }: { section: Section; go: (id: string) =>
 
   return (
     <div className="space-y-14 md:space-y-20">
-      <ModuleHeader section={section} title="Closing message" subtitle="Two hours, one idea." />
+      <ModuleHeader section={section} title="Closing message" subtitle="One session, one idea." />
 
       <Block>
         <div className="grain relative overflow-hidden rounded-[2rem] bg-ink-950 px-7 py-12 md:px-14 md:py-16 text-cream-50">
           <div className="pointer-events-none absolute -right-32 -top-32 h-[26rem] w-[26rem] rounded-full bg-coral-500/25 blur-3xl" />
           <div className="relative max-w-4xl space-y-7 font-display text-2xl md:text-3xl lg:text-[2.1rem] font-light leading-snug tracking-tight text-pretty">
             <p>
-              From today, let's not think of this as a seven-minute induction that we have to <span className="italic text-cream-400">complete.</span>
+              From today, let's not think of this as a checklist that we have to <span className="italic text-cream-400">complete.</span>
             </p>
             <p>
               Think of it as the <span className="text-coral-400">first proper client-servicing conversation</span> we're having with someone after they've chosen to become a Physique 57 client.
             </p>
             <p>The CRM gives us a head start — but it doesn't give us the person. That's what the conversation is for.</p>
             <p>
-              Be curious. Ask better questions. Listen properly. Don't overwhelm them. Make the information relevant. And make sure that when those seven minutes are over, the client feels more confident walking into Physique 57 than they did seven minutes earlier.
+              Be curious. Ask better questions. Listen properly. Don't overwhelm them. Make the information relevant. Make sure the client feels more confident walking into Physique 57 than they did before the conversation.
             </p>
             <p className="font-medium">That's a successful induction.</p>
           </div>

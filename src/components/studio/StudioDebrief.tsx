@@ -158,7 +158,7 @@ export function StudioDebrief({ session, dispatch, onAgain, onNew }: { session: 
       {/* Steps + feel + curveballs */}
       <section className="grid gap-4 lg:grid-cols-3">
         <div className="rounded-3xl border border-cream-200 bg-white p-5 shadow-soft">
-          <Eyebrow tone="coral">The First 7</Eyebrow>
+          <Eyebrow tone="coral">Seven-step induction</Eyebrow>
           <ul className="mt-4 space-y-2.5">
             {firstSeven.map((st) => {
               const complete = covered.has(st.n);

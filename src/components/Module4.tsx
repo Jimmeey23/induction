@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ArrowRight, ShieldAlert, User, Target, Compass, Heart, Stethoscope, Activity, Footprints, Cake, Users } from "lucide-react";
 import type { Section } from "../data";
 import { cn } from "../utils/cn";
-import { ModuleHeader, Statement, Card, Eyebrow, Display, Quote, Countdown, Block, Lede, Chip } from "./ui";
+import { ModuleHeader, Statement, Card, Eyebrow, Display, Quote, Block, Lede, Chip } from "./ui";
 
 const crmFields = [
   { k: "Client", v: "Brooke", hot: false },
@@ -93,8 +93,6 @@ export function Module4({ section, go }: { section: Section; go?: (id: string) =
 
           {/* Exercise panel */}
           <div className="flex flex-col gap-4">
-            <Countdown seconds={60} label="Read the profile · 60 seconds" />
-
             <div className={cn("flex-1 rounded-3xl p-7 md:p-8 transition-colors", stage === 2 ? "grain relative overflow-hidden bg-ink-950 text-cream-50" : "bg-cream-200/70 border border-cream-300")}>
               {stage === 2 && <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-coral-500/30 blur-3xl" />}
               <div className="relative space-y-6">

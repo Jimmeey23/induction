@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Siren, Eye, EyeOff, Lock, RotateCcw, Users, UserRound, Drama } from "lucide-react";
 import type { Section } from "../data";
 import { cn } from "../utils/cn";
-import { ModuleHeader, Card, Eyebrow, Display, Countdown, Block, Lede, Chip, Reveal, Statement } from "./ui";
+import { ModuleHeader, Card, Eyebrow, Display, Block, Lede, Chip, Reveal, Statement } from "./ui";
 
 /* ================================================================== */
 /* MODULE 7                                                            */
@@ -74,7 +74,7 @@ export function Module7({ section }: { section: Section }) {
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="space-y-3">
             <Eyebrow tone="coral">The crime sheet</Eyebrow>
-            <Display size="md">Thirteen ways to ruin seven minutes.</Display>
+            <Display size="md">Thirteen ways to ruin an induction.</Display>
           </div>
           <div className="flex items-center gap-3">
             <div className="rounded-full bg-ink-900 px-5 py-2 font-mono text-sm font-bold text-cream-50 tabular-nums">
@@ -201,7 +201,7 @@ const personas: Persona[] = [
     ],
     secret: (
       <>
-        Interrupt after two minutes: <em>“Sorry, I have a call in five minutes.”</em>
+        Interrupt the conversation: <em>“Sorry, I have another commitment coming up.”</em>
       </>
     ),
     objective: "Prioritise the Must Knows and shorten gracefully.",
@@ -370,7 +370,7 @@ export function Module8({ section, go }: { section: Section; go?: (id: string) =
               Run it for real
             </Eyebrow>
             <div className="font-display text-3xl md:text-4xl font-light tracking-tight">Open the Role-Play Studio</div>
-            <p className="max-w-xl text-white/85">Real member records from the CRM sheet, a secret persona auto-matched to the data, hidden truths that only surface when the right question is asked, timed curveballs — and an automatic debrief.</p>
+            <p className="max-w-xl text-white/85">Real member records from the CRM sheet, a secret persona auto-matched to the data, hidden truths that only surface when the right question is asked, observer-triggered curveballs — and a guided debrief.</p>
           </div>
           <span className="relative inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white text-coral-600 transition-transform group-hover:translate-x-1">
             <Users className="h-6 w-6" />
@@ -402,12 +402,11 @@ export function Module8({ section, go }: { section: Section; go?: (id: string) =
                   <Eyebrow tone="light">The Associate</Eyebrow>
                 </div>
                 <p className="mt-4 text-cream-200 leading-relaxed">
-                  Sees <strong className="text-cream-50">only the CRM profile</strong>. Run the First 7. Discover the rest.
+                  Sees <strong className="text-cream-50">only the CRM profile</strong>. Follow the seven-step framework. Discover the rest.
                 </p>
               </div>
             </div>
           </Card>
-          <Countdown seconds={7 * 60} label="Role-play round · 7 min" className="h-full" />
         </div>
       </Block>
 

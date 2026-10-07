@@ -1,8 +1,8 @@
-import { Mic, Clock, Quote as QuoteIcon, ListChecks, AlertTriangle, ArrowRight } from "lucide-react";
+import { Mic, Quote as QuoteIcon, ListChecks, AlertTriangle, ArrowRight } from "lucide-react";
 import { speakerNotes } from "../lib/speakerNotes";
 import { cn } from "../utils/cn";
 
-function NoteList({ title, Icon, items, accent }: { title: string; Icon: typeof Clock; items?: string[]; accent?: boolean }) {
+function NoteList({ title, Icon, items, accent }: { title: string; Icon: typeof QuoteIcon; items?: string[]; accent?: boolean }) {
   if (!items || items.length === 0) return null;
   return (
     <div className="space-y-2">
@@ -45,7 +45,6 @@ export function SpeakerNotes({ id, className }: { id: string; className?: string
       <p className="mt-5 font-display text-xl md:text-2xl font-light leading-snug tracking-tight">{note.purpose}</p>
 
       <div className="mt-6 grid gap-6 md:grid-cols-2">
-        <NoteList title="Timing" Icon={Clock} items={note.timing} />
         <NoteList title="Say this" Icon={QuoteIcon} items={note.say} accent />
         <NoteList title="How to run it" Icon={ListChecks} items={note.run} />
         <NoteList title="Watch for" Icon={AlertTriangle} items={note.watch} />

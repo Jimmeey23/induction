@@ -16,7 +16,7 @@ export interface SetupConfig {
 }
 
 const difficulties: { id: Difficulty; name: string; desc: string }[] = [
-  { id: "calm", name: "Calm", desc: "No interruptions. Pure First 7 practice." },
+  { id: "calm", name: "Calm", desc: "No interruptions. Practice the seven-step induction." },
   { id: "realistic", name: "Realistic", desc: "The persona's pressure line + two manual interruptions." },
   { id: "chaos", name: "Chaos", desc: "Several interruptions, triggered by the observer." },
 ];

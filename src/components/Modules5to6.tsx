@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Shuffle, Zap, Ban, RotateCcw } from "lucide-react";
 import type { Section } from "../data";
 import { cn } from "../utils/cn";
-import { ModuleHeader, Statement, Card, Eyebrow, Display, Quote, Countdown, Block, Lede, Chip, DoDont } from "./ui";
+import { ModuleHeader, Statement, Card, Eyebrow, Display, Quote, Block, Lede, Chip, DoDont } from "./ui";
 
 /* ================================================================== */
 /* MODULE 5                                                            */
@@ -126,17 +126,17 @@ export function Module5({ section }: { section: Section }) {
                 <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-coral-500">
                   <Zap className="h-5 w-5" />
                 </span>
-                <Eyebrow tone="light">Rapid-fire · Around the room</Eyebrow>
+                <Eyebrow tone="light">Group exercise · Around the room</Eyebrow>
               </div>
               <Display size="md" className="font-light">
-                Five seconds. One better question.
+                One better question.
               </Display>
               <ul className="space-y-3 text-cream-200">
                 <li className="flex items-start gap-3">
                   <span className="mt-1 font-display text-coral-400">1</span> A statement appears on screen.
                 </li>
                 <li className="flex items-start gap-3">
-                  <span className="mt-1 font-display text-coral-400">2</span> You have <strong className="text-cream-50">five seconds</strong> to produce a useful follow-up question.
+                  <span className="mt-1 font-display text-coral-400">2</span> Take a moment to produce a useful follow-up question.
                 </li>
                 <li className="flex items-start gap-3">
                   <Ban className="mt-1 h-4 w-4 text-coral-400" /> <strong className="text-cream-50">No recommendation allowed.</strong>
@@ -167,7 +167,6 @@ export function Module5({ section }: { section: Section }) {
                   <p className="font-display text-2xl font-light text-cream-400">Draw a statement to begin.</p>
                 )}
               </div>
-              {current && <Countdown key={round} seconds={5} label="Answer window" light autoStart />}
             </div>
           </div>
         </div>

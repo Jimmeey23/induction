@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ArrowRight, StickyNote, Footprints, MessageCircleQuestion } from "lucide-react";
 import type { Section } from "../data";
 import { cn } from "../utils/cn";
-import { ModuleHeader, BigQuestion, Reveal, WordWall, Statement, Card, Eyebrow, Display, Quote, Countdown, Bullets, DoDont, Block, Lede, Chip } from "./ui";
+import { ModuleHeader, BigQuestion, Reveal, WordWall, Statement, Card, Eyebrow, Display, Quote, Bullets, DoDont, Block, Lede, Chip } from "./ui";
 
 /* ================================================================== */
 /* MODULE 1                                                            */
@@ -96,7 +96,7 @@ export function Module1({ section }: { section: Section }) {
 export function Module2({ section }: { section: Section }) {
   return (
     <div className="space-y-14 md:space-y-20">
-      <ModuleHeader section={section} title="The 7-Minute Test" subtitle="What should a client feel after seven minutes with us?" />
+      <ModuleHeader section={section} title="The First-Visit Test" subtitle="What should a client feel after their first induction with us?" />
 
       <Block>
         <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
@@ -112,11 +112,10 @@ export function Module2({ section }: { section: Section }) {
               <p className="font-display text-2xl md:text-3xl lg:text-4xl font-light leading-tight tracking-tight text-balance">
                 Imagine you've just completed a new client's first induction. You get to decide <span className="italic text-coral-400">five things</span> you want them to walk away thinking or feeling.
               </p>
-              <p className="text-cream-300 text-lg">Write them down. Two minutes.</p>
+              <p className="text-cream-300 text-lg">Write them down, then compare your answers with the group.</p>
             </div>
           </Card>
           <div className="flex flex-col justify-between gap-4">
-            <Countdown seconds={120} label="Writing time" />
             <Card tone="cream" className="flex-1">
               <Eyebrow>Then</Eyebrow>
               <p className="mt-3 text-ink-700 leading-relaxed">We'll gather every answer in the room and look for the pattern.</p>
@@ -172,22 +171,18 @@ interface StepDef {
   n: number;
   name: string;
   mantra: string;
-  time: string;
-  secs: number;
   icon: string;
 }
 
 const stepDefs: StepDef[] = [
-  { n: 1, name: "Welcome", mantra: "Make me comfortable.", time: "30–45 sec", secs: 45, icon: "①" },
-  { n: 2, name: "Discover", mantra: "Understand me before explaining things to me.", time: "60–90 sec", secs: 90, icon: "②" },
-  { n: 3, name: "Decode", mantra: "Help me understand Physique 57.", time: "≈ 60–90 sec", secs: 90, icon: "③" },
-  { n: 4, name: "Navigate", mantra: "Teach me how to be a client.", time: "≈ 60–90 sec", secs: 90, icon: "④" },
-  { n: 5, name: "Tour", mantra: "Remove physical uncertainty.", time: "≈ 60 sec", secs: 60, icon: "⑤" },
-  { n: 6, name: "Personalise", mantra: "Connect what you've learned to what we offer.", time: "≈ 60 sec", secs: 60, icon: "⑥" },
-  { n: 7, name: "Close", mantra: "Give me a next step.", time: "30 sec", secs: 30, icon: "⑦" },
+  { n: 1, name: "Welcome", mantra: "Make me comfortable.", icon: "①" },
+  { n: 2, name: "Discover", mantra: "Understand me before explaining things to me.", icon: "②" },
+  { n: 3, name: "Decode", mantra: "Help me understand Physique 57.", icon: "③" },
+  { n: 4, name: "Navigate", mantra: "Teach me how to be a client.", icon: "④" },
+  { n: 5, name: "Tour", mantra: "Remove physical uncertainty.", icon: "⑤" },
+  { n: 6, name: "Personalise", mantra: "Connect what you've learned to what we offer.", icon: "⑥" },
+  { n: 7, name: "Close", mantra: "Give me a next step.", icon: "⑦" },
 ];
-
-const totalSecs = stepDefs.reduce((a, s) => a + s.secs, 0);
 
 function Step({ def, children, active, onClick }: { def: StepDef; children: React.ReactNode; active: boolean; onClick: () => void }) {
   return (
@@ -206,7 +201,6 @@ function Step({ def, children, active, onClick }: { def: StepDef; children: Reac
           </span>
           <div>
             <div className="font-display text-2xl md:text-3xl font-medium uppercase tracking-tight">{def.name}</div>
-            <div className="text-xs font-bold uppercase tracking-[0.2em] text-ink-500">{def.time}</div>
           </div>
         </div>
         <p className="font-display text-xl md:text-2xl italic font-light text-ink-700 leading-snug">{def.mantra}</p>
@@ -221,21 +215,18 @@ export function Module3({ section }: { section: Section }) {
 
   return (
     <div className="space-y-14 md:space-y-20">
-      <ModuleHeader section={section} title="The First 7" subtitle="One framework to remember — not a giant SOP. The complete induction, delivered naturally, in five to seven minutes." />
+      <ModuleHeader section={section} title="The 7-Step Framework" subtitle="One framework to remember — not a giant SOP. Deliver the complete induction naturally, at the client's pace." />
 
-      {/* Time map */}
+      {/* Framework map */}
       <Block>
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="space-y-3">
-            <Eyebrow tone="coral">The shape of seven minutes</Eyebrow>
+            <Eyebrow tone="coral">A flexible conversation framework</Eyebrow>
             <Display size="md">Seven moves. One conversation.</Display>
           </div>
-          <Chip tone="dark" className="px-4 py-2 text-sm">
-            Total ≈ 5–7 minutes
-          </Chip>
         </div>
         <div className="space-y-3">
-          <div className="flex h-20 w-full gap-1 overflow-hidden rounded-2xl">
+          <div className="flex w-full gap-1 overflow-hidden rounded-2xl">
             {stepDefs.map((s) => (
               <button
                 key={s.n}
@@ -244,22 +235,15 @@ export function Module3({ section }: { section: Section }) {
                   setActive(s.n);
                   document.getElementById(`step-${s.n}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
                 }}
-                style={{ width: `${(s.secs / totalSecs) * 100}%` }}
                 className={cn(
-                  "group relative flex flex-col items-start justify-center px-3 text-left transition-colors",
+                  "group relative flex flex-1 flex-col items-start justify-center px-3 py-4 text-left transition-colors",
                   active === s.n ? "bg-coral-500 text-white" : "bg-ink-900 text-cream-50 hover:bg-ink-700"
                 )}
               >
                 <span className="font-display text-base md:text-lg leading-none">{s.n}</span>
                 <span className="mt-1 hidden text-[10px] font-bold uppercase tracking-[0.18em] opacity-80 md:block truncate w-full">{s.name}</span>
-                <span className="hidden text-[10px] font-semibold opacity-60 lg:block truncate w-full">{s.time}</span>
               </button>
             ))}
-          </div>
-          <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-[0.2em] text-ink-400">
-            <span>Start</span>
-            <span>Bar widths are proportional to time</span>
-            <span>≈ 7 min</span>
           </div>
         </div>
       </Block>
@@ -267,9 +251,9 @@ export function Module3({ section }: { section: Section }) {
       {/* Steps */}
       <Block>
         <Step def={stepDefs[0]} active={active === 1} onClick={() => setActive(1)}>
-          <Bullets items={["Use their name.", "Introduce yourself.", "Explain why you're spending a few minutes with them."]} />
+          <Bullets items={["Use their name.", "Introduce yourself.", "Explain that you'll guide them through the essentials."]} />
           <Quote who="Example" tone="good">
-            Hi Brooke! Welcome. I'm Rhea. Since this is your first visit after joining us, I'm going to spend about five minutes showing you around and taking you through the important things that'll make your experience here really easy.
+            Hi Brooke! Welcome. I'm Rhea. Since this is your first visit after joining us, I'll show you around and take you through the important things that'll make your experience here really easy.
           </Quote>
         </Step>
 
@@ -356,7 +340,7 @@ export function Module3({ section }: { section: Section }) {
             <div className="space-y-3">
               <Eyebrow tone="light">Live demonstration</Eyebrow>
               <Display size="md" className="font-light">
-                Watch a full First 7 induction.
+                Watch a full seven-step induction.
               </Display>
               <Lede className="text-cream-300">While you watch, keep a tally.</Lede>
             </div>
