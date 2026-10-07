@@ -108,15 +108,24 @@ export function Overview({ go }: { go: (id: string) => void }) {
                 <button
                   type="button"
                   onClick={() => go(s.id)}
-                  className="group grid w-full grid-cols-1 gap-2 px-6 py-4 text-left transition-colors hover:bg-cream-100 md:grid-cols-[1fr_260px] md:items-center md:gap-4"
+                  className="group grid w-full grid-cols-1 gap-2 px-6 py-5 text-left transition-colors hover:bg-cream-100 md:grid-cols-[1fr_260px] md:gap-4"
                 >
-                  <span className="flex items-center gap-3">
-                    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-ink-900 font-display text-xs text-cream-50 group-hover:bg-coral-500 transition-colors">
+                  <span className="flex gap-3">
+                    <span className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-ink-900 font-display text-xs text-cream-50 group-hover:bg-coral-500 transition-colors">
                       {s.num}
                     </span>
-                    <span className="font-display text-lg md:text-xl font-medium tracking-tight">{s.label}</span>
+                    <span className="min-w-0 space-y-1.5">
+                      <span className="block font-display text-lg md:text-xl font-medium tracking-tight">{s.label}</span>
+                      {s.summary && <span className="block text-sm leading-relaxed text-ink-600">{s.summary}</span>}
+                      {s.takeaway && (
+                        <span className="block border-l-2 border-coral-500/50 pl-3 text-sm leading-relaxed text-ink-500">
+                          <span className="font-bold uppercase tracking-[0.14em] text-[10px] text-coral-700">What it tells us · </span>
+                          {s.takeaway}
+                        </span>
+                      )}
+                    </span>
                   </span>
-                  <span className="flex items-center justify-between">
+                  <span className="flex items-start justify-between md:pt-1">
                     <span className="text-sm text-ink-500">{s.format}</span>
                     <ArrowRight className="h-4 w-4 text-ink-300 transition-all group-hover:translate-x-1 group-hover:text-coral-500" />
                   </span>

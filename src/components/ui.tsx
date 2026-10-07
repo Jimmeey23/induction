@@ -450,6 +450,22 @@ export function ModuleHeader({
           {subtitle && <Lede>{subtitle}</Lede>}
         </div>
       </div>
+      {(section.summary || section.takeaway) && (
+        <div className="mt-7 grid gap-3 md:grid-cols-2">
+          {section.summary && (
+            <div className="rounded-2xl border border-cream-200 bg-white p-5 shadow-soft">
+              <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-ink-500">In this chapter</div>
+              <p className="mt-2 text-[15px] leading-relaxed text-ink-700">{section.summary}</p>
+            </div>
+          )}
+          {section.takeaway && (
+            <div className="rounded-2xl border border-coral-500/25 bg-coral-500/[0.07] p-5">
+              <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-coral-700">What it tells us</div>
+              <p className="mt-2 text-[15px] leading-relaxed text-ink-800">{section.takeaway}</p>
+            </div>
+          )}
+        </div>
+      )}
       {children}
     </header>
   );

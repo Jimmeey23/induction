@@ -70,6 +70,81 @@ export function Module1({ section }: { section: Section }) {
         </div>
       </Block>
 
+      <Block>
+        <div className="max-w-3xl space-y-3">
+          <Eyebrow tone="coral">The cost of skipping it</Eyebrow>
+          <Display size="md">Nobody complains about a missing induction. They just stop coming.</Display>
+          <Lede>
+            A member who never got one rarely tells us anything is wrong. The signal arrives quietly, weeks later, as an unused package.
+          </Lede>
+        </div>
+        <div className="grid gap-3 md:grid-cols-3">
+          {[
+            {
+              head: "They guess, and guess wrong",
+              body: "Wrong class, wrong level, wrong expectation. The first session feels harder or duller than it should, and the member reads that as “this isn’t for me” rather than “I picked the wrong class”.",
+            },
+            {
+              head: "They never find a person",
+              body: "Without one name they trust, every small question — a reschedule, an injury, a late arrival — becomes a reason to skip rather than a reason to ask.",
+            },
+            {
+              head: "We learn nothing about them",
+              body: "No goal, no history, no constraint recorded. Every later conversation starts from zero, and the service never gets more personal than day one.",
+            },
+          ].map((c) => (
+            <Card key={c.head} tone="light" className="space-y-2">
+              <p className="font-display text-xl font-medium tracking-tight">{c.head}</p>
+              <p className="text-[15px] leading-relaxed text-ink-600">{c.body}</p>
+            </Card>
+          ))}
+        </div>
+      </Block>
+
+      <Block>
+        <div className="grid gap-6 lg:grid-cols-[1fr_1.3fr] lg:items-start">
+          <div className="space-y-3">
+            <Eyebrow tone="coral">What it is worth</Eyebrow>
+            <Display size="md">Fifteen minutes that decides the next twelve months.</Display>
+          </div>
+          <div className="space-y-5">
+            <p className="text-lg leading-relaxed text-ink-700">
+              The induction is the cheapest, earliest and most controllable moment we have. It costs one short conversation,
+              it happens before any habit has formed, and it is entirely in our hands — unlike the class itself, the member’s
+              schedule, or how their week is going.
+            </p>
+            <Bullets
+              icon="check"
+              items={[
+                <span key="a"><strong className="font-semibold">Retention is decided early.</strong> A member who leaves their first visit with a clear next step comes back for it. One who leaves with an unanswered question waits — and waiting becomes not returning.</span>,
+                <span key="b"><strong className="font-semibold">Confidence drives attendance.</strong> People do not avoid hard classes. They avoid rooms where they expect to feel foolish.</span>,
+                <span key="c"><strong className="font-semibold">What we learn compounds.</strong> One recorded goal or injury makes every future recommendation sharper, for whoever is on shift.</span>,
+                <span key="d"><strong className="font-semibold">Referrals start here.</strong> Members describe us the way their first week felt, not the way our marketing reads.</span>,
+              ]}
+            />
+          </div>
+        </div>
+      </Block>
+
+      <Block>
+        <Card tone="dark" className="space-y-5">
+          <Eyebrow tone="light">Why it sits with us</Eyebrow>
+          <p className="font-display text-2xl md:text-3xl font-light leading-tight tracking-tight text-balance">
+            Sales earns the decision. Client Servicing earns the <span className="italic text-coral-400">habit.</span>
+          </p>
+          <p className="max-w-3xl text-lg leading-relaxed text-cream-300">
+            By the time a member reaches us, they have already said yes. Nothing about the induction is persuasion —
+            it is the handover, and it is the first evidence they get that the yes was a good decision. Done well, it is
+            invisible: the member simply feels looked after. Done badly, it is also invisible — until they are gone.
+          </p>
+          <div className="flex flex-wrap gap-3 pt-1">
+            <Chip tone="light">Not a form to complete</Chip>
+            <Chip tone="light">Not a tour</Chip>
+            <Chip tone="light">A conversation with a purpose</Chip>
+          </div>
+        </Card>
+      </Block>
+
       <div className="grid gap-4 md:grid-cols-[1fr_auto_1fr] md:items-stretch">
         <Card tone="cream" className="flex flex-col justify-between">
           <Eyebrow>Done</Eyebrow>

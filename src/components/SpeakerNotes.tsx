@@ -1,61 +1,49 @@
-import { Mic, Quote as QuoteIcon, ListChecks, AlertTriangle, ArrowRight } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Mic, Minus, Plus, X } from "lucide-react";
 import { speakerNotes } from "../lib/speakerNotes";
 import { cn } from "../utils/cn";
 
-function NoteList({ title, Icon, items, accent }: { title: string; Icon: typeof QuoteIcon; items?: string[]; accent?: boolean }) {
-  if (!items || items.length === 0) return null;
-  return (
-    <div className="space-y-2">
-      <div className={cn("flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em]", accent ? "text-coral-600" : "text-ink-500")}>
-        <Icon className="h-3.5 w-3.5" />
-        {title}
-      </div>
-      <ul className="space-y-1.5">
-        {items.map((t) => (
-          <li key={t} className="flex gap-2.5 text-sm leading-relaxed text-ink-700">
-            <span className={cn("mt-2 h-1 w-1 shrink-0 rounded-full", accent ? "bg-coral-500" : "bg-ink-300")} />
-            <span>{t}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
+function ScriptText({ id }: { id: string }) {
+  return <div className="space-y-5">{speakerNotes[id]?.script.map((line, index) => <p key={`${id}-${index}`} className="leading-[1.8] text-ink-800">{line}</p>)}</div>;
+}
+
+/** Static script for the trainer's printed pack. */
+export function SpeakerNotes({ id, className }: { id: string; className?: string }) {
+  if (!speakerNotes[id]) return null;
+  return <section className={cn("break-inside-avoid rounded-3xl border border-cream-300 bg-cream-50 p-6 md:p-8", className)}>
+    <h2 className="mb-5 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-ink-700"><Mic className="h-4 w-4" /> Speaker script</h2>
+    <ScriptText id={id} />
+  </section>;
 }
 
 /**
- * Trainer-facing notes for a section. Rendered inline on screen when notes are
- * toggled on, and always rendered in the PDF export.
+ * The reader, docked as its own column beside the content — it never covers the
+ * app. Navigation changes the script without remounting the panel.
  */
-export function SpeakerNotes({ id, className }: { id: string; className?: string }) {
-  const note = speakerNotes[id];
-  if (!note) return null;
+export function DockedSpeakerNotes({ id, label, onClose }: { id: string; label: string; onClose: () => void }) {
+  const readerRef = useRef<HTMLDivElement>(null);
+  const [fontSize, setFontSize] = useState(17);
+
+  useEffect(() => { readerRef.current?.scrollTo({ top: 0 }); }, [id]);
 
   return (
-    <aside className={cn("break-inside-avoid rounded-3xl border border-gold-200 bg-gold-200/25 p-6 md:p-8", className)}>
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gold-500/30 pb-4">
-        <div className="flex items-center gap-2.5">
-          <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-ink-900 text-cream-50">
-            <Mic className="h-3.5 w-3.5" />
-          </span>
-          <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-ink-700">Speaker notes</span>
-        </div>
-        <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-ink-400">Trainer only · not on the client's screen</span>
+    <aside
+      id="speaker-script-panel"
+      aria-label="Speaker script"
+      className="no-print z-30 flex min-h-0 lg:order-3 flex-col overflow-hidden border-cream-300 bg-cream-50 max-lg:max-h-[55dvh] max-lg:border-b lg:sticky lg:top-0 lg:h-screen lg:border-l"
+      onKeyDown={(event) => { if (["ArrowLeft", "ArrowRight", "PageUp", "PageDown"].includes(event.key)) event.stopPropagation(); }}
+    >
+      <div className="flex items-center gap-2 border-b border-white/10 bg-ink-900 px-3 py-3 text-cream-50">
+        <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10"><Mic className="h-4 w-4" /></span>
+        <div className="min-w-0 flex-1"><h2 className="text-sm font-semibold">Speaker script</h2><p className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-cream-400">Physique 57 India</p></div>
+        <button type="button" onClick={() => setFontSize((size) => Math.max(14, size - 1))} disabled={fontSize <= 14} aria-label="Decrease script text size" className="rounded-lg p-2 hover:bg-white/10 disabled:opacity-30"><Minus className="h-4 w-4" /></button>
+        <button type="button" onClick={() => setFontSize((size) => Math.min(24, size + 1))} disabled={fontSize >= 24} aria-label="Increase script text size" className="rounded-lg p-2 hover:bg-white/10 disabled:opacity-30"><Plus className="h-4 w-4" /></button>
+        <button type="button" onClick={onClose} aria-label="Close speaker script" className="rounded-lg p-2 hover:bg-white/10"><X className="h-4 w-4" /></button>
       </div>
-
-      <p className="mt-5 font-display text-xl md:text-2xl font-light leading-snug tracking-tight">{note.purpose}</p>
-
-      <div className="mt-6 grid gap-6 md:grid-cols-2">
-        <NoteList title="Say this" Icon={QuoteIcon} items={note.say} accent />
-        <NoteList title="How to run it" Icon={ListChecks} items={note.run} />
-        <NoteList title="Watch for" Icon={AlertTriangle} items={note.watch} />
+      <div className="border-b border-cream-200 bg-white px-5 py-3"><p className="text-xs font-semibold leading-relaxed text-coral-700">{label}</p></div>
+      <div ref={readerRef} tabIndex={0} aria-label={`${label} spoken script`} className="scrollbar-thin min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-5 focus-visible:outline-2 focus-visible:outline-inset focus-visible:outline-coral-600" style={{ fontSize }}>
+        {speakerNotes[id] ? <ScriptText id={id} /> : <p className="text-sm text-ink-500">No script is available for this section.</p>}
       </div>
-
-      {note.transition && (
-        <div className="mt-6 flex gap-2.5 border-t border-gold-500/30 pt-4">
-          <ArrowRight className="mt-0.5 h-4 w-4 shrink-0 text-coral-500" />
-          <p className="font-display text-base md:text-lg font-light italic tracking-tight text-ink-800">“{note.transition}”</p>
-        </div>
-      )}
     </aside>
   );
 }

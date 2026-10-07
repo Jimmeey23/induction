@@ -11,7 +11,7 @@ import { Module9, Module10 } from "./components/Modules9to10";
 import { CrmLoop, CheatSheet, NeverDo, Closing } from "./components/Toolkit";
 import { RolePlayStudio } from "./components/studio/RolePlayStudio";
 import { MemberProfiles } from "./components/MemberProfiles";
-import { SpeakerNotes } from "./components/SpeakerNotes";
+import { DockedSpeakerNotes } from "./components/SpeakerNotes";
 import { PrintDoc } from "./components/PrintDoc";
 
 /* ------------------------------------------------------------------ */
@@ -90,6 +90,11 @@ export default function App() {
   const [notesOpen, setNotesOpen] = useState(() => localStorage.getItem("p57.notes") === "1");
   const [printing, setPrinting] = useState<null | { withNotes: boolean }>(null);
   const mainRef = useRef<HTMLDivElement>(null);
+  const notesToggleRef = useRef<HTMLButtonElement>(null);
+  const closeNotes = useCallback(() => {
+    setNotesOpen(false);
+    notesToggleRef.current?.focus();
+  }, []);
 
   const index = ids.indexOf(view);
   const section = sections[index];
@@ -138,20 +143,25 @@ export default function App() {
     const onKey = (e: KeyboardEvent) => {
       const t = e.target as HTMLElement | null;
       if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
+      if (e.key === "n" || e.key === "N") {
+        setNotesOpen((open) => !open);
+        return;
+      }
+      if (e.key === "Escape") {
+        if (notesOpen) closeNotes();
+        setMenuOpen(false);
+        return;
+      }
       if (view === "studio" || view === "members") return;
       if (e.key === "ArrowRight" || e.key === "PageDown") {
         if (next) go(next.id);
       } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
         if (prev) go(prev.id);
-      } else if (e.key === "n" || e.key === "N") {
-        setNotesOpen((n) => !n);
-      } else if (e.key === "Escape") {
-        setMenuOpen(false);
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [next, prev, go, view]);
+  }, [next, prev, go, view, notesOpen, closeNotes]);
 
   const content = (() => {
     switch (view) {
@@ -245,9 +255,9 @@ export default function App() {
 
   return (
     <>
-    <div className="screen-root min-h-screen bg-cream-100 lg:grid lg:grid-cols-[288px_1fr]">
+    <div className={cn("screen-root min-h-screen bg-cream-100 lg:grid", notesOpen ? "lg:grid-cols-[288px_minmax(0,1fr)_minmax(340px,420px)]" : "lg:grid-cols-[288px_minmax(0,1fr)]")}>
       {/* Desktop sidebar */}
-      <aside className="no-print hidden lg:block sticky top-0 h-screen bg-ink-950 text-cream-50">{Nav}</aside>
+      <aside className="no-print hidden lg:order-1 lg:block sticky top-0 h-screen bg-ink-950 text-cream-50">{Nav}</aside>
 
       {/* Mobile drawer */}
       {menuOpen && (
@@ -262,8 +272,11 @@ export default function App() {
         </div>
       )}
 
+      {/* Speaker script — its own column on desktop, a stacked panel below it */}
+      {notesOpen && <DockedSpeakerNotes id={view} label={section.label} onClose={closeNotes} />}
+
       {/* Main */}
-      <div ref={mainRef} className="flex min-h-screen flex-col">
+      <div ref={mainRef} className="flex min-h-screen flex-col lg:order-2">
         <header className="no-print sticky top-0 z-40 border-b border-ink-900/10 bg-cream-100/85 backdrop-blur-md">
           <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3 md:px-8">
             <div className="flex items-center gap-3 min-w-0">
@@ -280,13 +293,17 @@ export default function App() {
             <div className="flex items-center gap-2">
               <button
                 type="button"
+                ref={notesToggleRef}
                 onClick={() => setNotesOpen((n) => !n)}
                 className={cn(
                   "inline-flex items-center gap-2 rounded-full border px-3 py-2 text-[11px] font-bold uppercase tracking-[0.16em] transition-colors",
                   notesOpen ? "border-ink-900 bg-ink-900 text-cream-50" : "border-cream-300 bg-white text-ink-700 hover:border-ink-900/40"
                 )}
                 aria-pressed={notesOpen}
-                title="Toggle speaker notes (N)"
+                aria-expanded={notesOpen}
+                aria-controls={notesOpen ? "speaker-script-panel" : undefined}
+                aria-label="Toggle speaker script"
+                title="Toggle speaker script (N)"
               >
                 {notesOpen ? <Mic className="h-3.5 w-3.5" /> : <MicOff className="h-3.5 w-3.5" />}
                 <span className="hidden sm:inline">Notes</span>
@@ -306,7 +323,6 @@ export default function App() {
               {content}
             </div>
           )}
-          {notesOpen && <SpeakerNotes id={view} className="no-print mt-14" />}
           <div className={view === "studio" ? "animate-fade-up" : "hidden"}>
             <RolePlayStudio section={sections.find((s) => s.id === "studio")!} />
           </div>
