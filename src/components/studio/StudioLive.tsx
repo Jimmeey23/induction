@@ -138,7 +138,7 @@ function AssociateView({ s, dispatch }: { s: Session; dispatch: (a: Action) => v
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <Eyebrow tone="coral">The seven-step induction · tap each step as you begin it</Eyebrow>
-          <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-ink-400">{new Set(s.stepLog.map((e) => e.step)).size}/7 covered</span>
+          <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-ink-400">{new Set(s.stepLog).size}/7 covered</span>
         </div>
         <ol className="space-y-2">
           {firstSeven.map((st) => {
@@ -178,7 +178,7 @@ function AssociateView({ s, dispatch }: { s: Session; dispatch: (a: Action) => v
             <HelpCircle className="h-6 w-6 shrink-0 text-sage-700" />
             <span>
               <span className="block text-sm font-bold text-sage-700">“I don't want to give you the wrong information. Let me check that for you.”</span>
-              <span className="block text-xs text-ink-500">Tap when you say it · {s.checks.length} so far</span>
+              <span className="block text-xs text-ink-500">Tap when you say it · {s.checks} so far</span>
             </span>
           </button>
           <div className="rounded-2xl border border-cream-300 bg-cream-200/60 p-4 text-sm text-ink-700">
@@ -200,7 +200,7 @@ const feelLabels = ["Lost", "Unsure", "Okay", "Comfortable", "Confident"];
 function ClientView({ s, dispatch }: { s: Session; dispatch: (a: Action) => void }) {
   const p = s.scenario.persona;
   const m = s.scenario.member;
-  const last = s.feelLog[s.feelLog.length - 1]?.v ?? 35;
+  const last = s.feelLog[s.feelLog.length - 1] ?? 35;
   const [feel, setFeel] = useState(last);
   const pending = s.fired.filter((f) => !f.delivered && f.kind !== "event");
   const delivered = s.fired.filter((f) => f.delivered && f.kind !== "event");

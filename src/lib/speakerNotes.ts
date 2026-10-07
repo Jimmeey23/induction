@@ -78,13 +78,13 @@ export const speakerNotes: Record<string, SpeakerNote> = {
       "You already have CRM information. Don't repeat it back to them — use it to ask better questions.",
     ],
     run: [
-      "Walk the seven moves once, quickly. Resist explaining each one in depth — Modules 4 to 6 do that.",
+      "Walk the seven moves once. Resist explaining each one in depth — Modules 4 to 6 do that.",
       "Then do the live demonstration yourself with a volunteer as the client, modelling a natural and client-led conversation.",
       "Ask the room to keep a tally while they watch: how many questions did the associate ask vs. how many statements did they make?",
       "Debrief on the tally number, not on style.",
     ],
     watch: [
-      "Demonstrate at normal speed, including the pauses. A rushed demo teaches the wrong thing.",
+      "Demonstrate naturally, including pauses. Leave space for the client to respond.",
       "If you're not comfortable demoing, pre-brief your strongest associate before the session.",
     ],
     transition: "Everything in that demo started before the client arrived — on the CRM screen. Let's go there.",

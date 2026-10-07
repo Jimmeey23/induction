@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Menu, X, Keyboard, FileDown, Mic, MicOff, Loader2 } from "lucide-react";
 import { sections } from "./data";
 import { cn } from "./utils/cn";
