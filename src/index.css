@@ -1,0 +1,120 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: "DM Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --color-ink-950: #0b0b0c;
+  --color-ink-900: #121214;
+  --color-ink-800: #1c1c1f;
+  --color-ink-700: #2a2a2e;
+  --color-ink-600: #3d3d42;
+  --color-ink-500: #5b5b62;
+  --color-ink-400: #83838b;
+  --color-ink-300: #b4b4ba;
+
+  --color-cream-50: #fcfaf7;
+  --color-cream-100: #f7f3ee;
+  --color-cream-200: #efe8df;
+  --color-cream-300: #e3d9cc;
+  --color-cream-400: #cdbfae;
+
+  --color-coral-300: #ffb8a8;
+  --color-coral-400: #ff8a73;
+  --color-coral-500: #f2573f;
+  --color-coral-600: #d9432c;
+  --color-coral-700: #b23620;
+
+  --color-sage-200: #d8e2d6;
+  --color-sage-500: #6f8f74;
+  --color-sage-700: #3f5c45;
+
+  --color-gold-200: #f3e4bd;
+  --color-gold-500: #c9a24a;
+
+  --shadow-soft: 0 1px 2px rgba(11, 11, 12, 0.04), 0 10px 30px -12px rgba(11, 11, 12, 0.18);
+  --shadow-lift: 0 2px 4px rgba(11, 11, 12, 0.05), 0 20px 50px -20px rgba(11, 11, 12, 0.28);
+
+  --animate-fade-up: fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-fade-in: fade-in 0.4s ease-out both;
+  --animate-pulse-soft: pulse-soft 1.6s ease-in-out infinite;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes pulse-soft {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.55;
+    }
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-cream-100 text-ink-900 font-sans antialiased;
+  font-size-adjust: from-font;
+}
+
+.font-display {
+  font-optical-sizing: auto;
+  font-size-adjust: from-font;
+}
+
+::selection {
+  background: #f2573f;
+  color: #fff;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #2a2a2e;
+  border-radius: 999px;
+}
+
+.grain {
+  position: relative;
+}
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.08;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  body {
+    background: #fff;
+  }
+}
