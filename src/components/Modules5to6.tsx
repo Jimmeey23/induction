@@ -1,70 +1,46 @@
 import { useState } from "react";
 import { Shuffle, Zap, Ban, RotateCcw } from "lucide-react";
 import type { Section } from "../data";
-import { cn } from "../utils/cn";
+import { QuestionInferenceGuide, type QuestionInference } from "./QuestionInferenceGuide";
 import { ModuleHeader, Statement, Card, Eyebrow, Display, Quote, Block, Lede, Chip, DoDont } from "./ui";
 
 /* ================================================================== */
 /* MODULE 5                                                            */
 /* ================================================================== */
 
-const deeper = [
-  { say: "I want to tone.", ask: "When you say tone, is there anything in particular you're hoping to work on?" },
-  { say: "I don't like cardio.", ask: "What is it about cardio you don't enjoy — the type of exercise or that very high-intensity feeling?" },
-  { say: "Evenings are easier.", ask: "Is that generally throughout the week or only on particular days?" },
-  { say: "I want to lose weight.", ask: "Apart from the number on the scale, is there anything you'd really like to feel different — strength, energy, stamina, confidence?" },
-  { say: "I used to work out.", ask: "What were you doing, and what did you actually enjoy?" },
+interface DeeperPrompt extends QuestionInference { say: string }
+
+const rapidDeck: DeeperPrompt[] = [
+  { say: "I want to tone.", evidence: "Member stated: I want to tone.", inference: "Tone may mean strength, definition or confidence to this member; the meaning is still unknown.", ask: "What does feeling toned mean to you?", follow: "What change would you most like to notice in everyday life?" },
+  { say: "I don't like cardio.", evidence: "Member stated: I don’t like cardio.", inference: "The barrier could relate to intensity, format or a previous experience. It does not establish a medical limitation.", ask: "What is it about cardio that you don’t enjoy?", follow: "What kinds of practice have felt good for you instead?" },
+  { say: "Evenings are easier.", evidence: "Member stated: Evenings are easier.", inference: "Evening availability may help consistency, but specific days and competing commitments remain unknown.", ask: "Which evenings fit most comfortably into your week?", follow: "What could make those times difficult to keep?" },
+  { say: "I want to lose weight.", evidence: "Member stated: I want to lose weight.", inference: "A weight goal is stated. Broader motivations or desired changes should be explored without assuming dissatisfaction or promising an outcome.", ask: "What would achieving that goal mean to you?", follow: "What other changes, if any, would you like to notice along the way?" },
+  { say: "I used to work out.", evidence: "Member stated: I used to work out.", inference: "There is previous practice experience, but its type, recency and the reason for stopping are unknown.", ask: "What kind of practice did you do, and what did you enjoy about it?", follow: "What would help you return to a routine now?" },
+  { say: "I just want to get back into a routine.", evidence: "Member stated: I want to get back into a routine.", inference: "Consistency may be a priority. The member’s barriers and realistic frequency are not yet known.", ask: "What would a manageable routine look like for you right now?", follow: "What has made keeping a routine difficult in the past?" },
+  { say: "I've heard Barre is really hard.", evidence: "Member stated: I’ve heard Barre is really hard.", inference: "The member may want clarity about what to expect. This statement alone does not establish fear or readiness.", ask: "What have you heard about Barre, and what would you like to understand better?", follow: "What would help you feel prepared for your first Studio Session?" },
+  { say: "I only have 45 minutes in the mornings.", evidence: "Member stated: I only have 45 minutes in the mornings.", inference: "Time is a stated constraint; clarify whether it includes travel and changing before suggesting an option.", ask: "What needs to fit into those 45 minutes?", follow: "Which mornings are realistic for you, including getting to and from the Studio Space?" },
+  { say: "I want to get leaner.", evidence: "Member stated: I want to get leaner.", inference: "Leaner is an undefined goal; explore the member’s meaning without assuming a weight target.", ask: "What does getting leaner mean to you personally?", follow: "How would you like to recognise progress?" },
+  { say: "My friend told me I should try this.", evidence: "Member stated: My friend told me I should try this.", inference: "A friend prompted the visit, but the member’s own motivation and interests are still unknown.", ask: "What made you decide to give the Method a try for yourself?", follow: "What would make this worthwhile for you?" },
+  { say: "I get bored easily.", evidence: "Member stated: I get bored easily.", inference: "Variety may matter, but the member could also value challenge, music or visible progress. Ask before choosing a format.", ask: "What keeps a Studio Session engaging for you?", follow: "What has made you lose interest in past routines?" },
+  { say: "I have a holiday in six weeks.", evidence: "Member stated: I have a holiday in six weeks.", inference: "There is a near-term event, but no specific transformation goal has been stated.", ask: "What would you like to feel or be able to do by your holiday?", follow: "What kind of routine feels realistic over the next six weeks?" },
+  { say: "I've never done a group class before.", evidence: "Member stated: I’ve never done a group session before.", inference: "The group format is new. This does not establish their overall practice experience or comfort level.", ask: "What would you like to know about practising in a group?", follow: "What would help you feel comfortable in your first session?" },
+  { say: "I want to build strength.", evidence: "Member stated: I want to build strength.", inference: "Strength is a stated goal; the member’s baseline and personally meaningful outcomes still need context.", ask: "What would being stronger help you do?", follow: "What strength practice, if any, are you doing at the moment?" },
+  { say: "I'm not very flexible.", evidence: "Member stated: I’m not very flexible.", inference: "The member describes a limitation, but may be asking about participation, comfort or progress. Do not treat it as a diagnosis.", ask: "How does that affect what you would like to do in a session?", follow: "What would you like your Instructor to help you understand before you begin?" },
 ];
 
-const rapidDeck = [
-  ...deeper.map((d) => d.say),
-  "I just want to get back into a routine.",
-  "I've heard Barre is really hard.",
-  "I only have 45 minutes in the mornings.",
-  "I want to get leaner.",
-  "My friend told me I should try this.",
-  "I get bored easily.",
-  "I have a holiday in six weeks.",
-  "I've never done a group class before.",
-  "I want to build strength.",
-  "I'm not very flexible.",
-];
-
-function FlipCard({ say, ask, index }: { say: string; ask: string; index: number }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <button
-      type="button"
-      onClick={() => setOpen((o) => !o)}
-      className={cn(
-        "group relative flex min-h-[200px] flex-col justify-between rounded-3xl border p-6 text-left transition-all",
-        open ? "border-ink-900 bg-ink-900 text-cream-50 shadow-lift" : "border-cream-200 bg-white shadow-soft hover:-translate-y-0.5"
-      )}
-    >
-      <div className="flex items-center justify-between">
-        <span className={cn("text-[11px] font-bold uppercase tracking-[0.2em]", open ? "text-coral-400" : "text-ink-500")}>{open ? "Ask one level deeper" : `Client says · ${index + 1}`}</span>
-        <span className={cn("rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider", open ? "bg-white/10" : "bg-cream-200 text-ink-600")}>{open ? "Tap to flip back" : "Tap to reveal"}</span>
-      </div>
-      {open ? (
-        <p className="animate-fade-in mt-4 font-display text-xl md:text-2xl italic font-light leading-snug">“{ask}”</p>
-      ) : (
-        <p className="mt-4 font-display text-2xl md:text-3xl font-medium tracking-tight">“{say}”</p>
-      )}
-    </button>
-  );
-}
+const deeper = rapidDeck.slice(0, 5);
 
 export function Module5({ section }: { section: Section }) {
-  const [current, setCurrent] = useState<string | null>(null);
+  const [current, setCurrent] = useState<DeeperPrompt | null>(null);
   const [drawn, setDrawn] = useState<string[]>([]);
   const [round, setRound] = useState(0);
 
   const draw = () => {
-    const remaining = rapidDeck.filter((s) => !drawn.includes(s));
+    const remaining = rapidDeck.filter((item) => !drawn.includes(item.say));
     const pool = remaining.length ? remaining : rapidDeck;
     const next = pool[Math.floor(Math.random() * pool.length)];
     setCurrent(next);
-    setDrawn(remaining.length ? [...drawn, next] : [next]);
+    setDrawn(remaining.length ? [...drawn, next.say] : [next.say]);
     setRound((r) => r + 1);
   };
 
@@ -101,11 +77,11 @@ export function Module5({ section }: { section: Section }) {
         <div className="space-y-3">
           <Eyebrow tone="coral">The move</Eyebrow>
           <Display size="lg">ONE LEVEL DEEPER.</Display>
-          <Lede>Tap each statement to see a follow-up question that earns the recommendation.</Lede>
+          <Lede>Discuss each statement, then expand its ideal question, tentative inference and follow-up.</Lede>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {deeper.map((d, i) => (
-            <FlipCard key={d.say} say={d.say} ask={d.ask} index={i} />
+          {deeper.map((item) => (
+            <QuestionInferenceGuide key={item.say} label={`“${item.say}” · Ideal question & inference`} items={[item]} />
           ))}
           <div className="flex min-h-[200px] flex-col justify-between rounded-3xl border border-dashed border-ink-900/20 bg-cream-200/40 p-6">
             <Eyebrow>Pattern</Eyebrow>
@@ -160,13 +136,14 @@ export function Module5({ section }: { section: Section }) {
             <div className="flex flex-col gap-4">
               <div className="flex min-h-[260px] flex-1 items-center justify-center rounded-3xl border border-white/10 bg-white/5 p-8 text-center">
                 {current ? (
-                  <p key={current} className="animate-fade-up font-display text-3xl md:text-4xl lg:text-5xl font-light italic leading-tight tracking-tight">
-                    “{current}”
+                  <p key={current.say} className="animate-fade-up font-display text-3xl md:text-4xl lg:text-5xl font-light italic leading-tight tracking-tight">
+                    “{current.say}”
                   </p>
                 ) : (
                   <p className="font-display text-2xl font-light text-cream-400">Draw a statement to begin.</p>
                 )}
               </div>
+              {current && <QuestionInferenceGuide key={round} label="This statement · Ideal question & inference" items={[current]} />}
             </div>
           </div>
         </div>

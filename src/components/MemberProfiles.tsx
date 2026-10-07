@@ -1,12 +1,12 @@
-import { useMemo, useState } from "react";
-import { Search, Shuffle, ArrowRight, Sparkles, Play, Lightbulb, MessageCircle, Check, ChevronDown } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Shuffle, ArrowRight, Lightbulb, MessageCircle, Check, ChevronDown } from "lucide-react";
 import type { Section } from "../data";
 import { useMembers } from "../lib/useMembers";
 import type { Member } from "../lib/members";
 import { buildTruths, suggestPersona } from "../lib/scenarios";
 import { cn } from "../utils/cn";
-import { ModuleHeader, Eyebrow, Display, Chip, Reveal } from "./ui";
-import { MemberCard, MemberTile, DataSourcePanel } from "./studio/MemberCard";
+import { ModuleHeader, Eyebrow } from "./ui";
+import { MemberCard, DataSourcePanel } from "./studio/MemberCard";
 
 const tagLetter: Record<string, string> = { Goal: "G", Context: "C", Preference: "P", Consideration: "C", Behaviour: "B", Persona: "?" };
 
@@ -60,154 +60,84 @@ function QuestionCoach({ member }: { member: Member | null }) {
   );
 }
 
-export function MemberProfiles({ section, go }: { section: Section; go: (id: string) => void }) {
-  const { members, usingSamples } = useMembers();
-  const [query, setQuery] = useState("");
-  const [id, setId] = useState<string | null>(null);
-  const [stage, setStage] = useState<0 | 1 | 2>(0);
-
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return members;
-    return members.filter((m) => [m.name, m.goal, m.membership, m.location, m.tags.join(" "), m.experience, m.source, m.medical].filter(Boolean).join(" ").toLowerCase().includes(q));
-  }, [members, query]);
-
-  const member = members.find((m) => m.id === id) ?? null;
-  const asks = useMemo(() => (member ? buildTruths(member, suggestPersona(member)) : []), [member]);
-
-  const known = member
-    ? [
-        member.goal && `Goal: ${member.goal}`,
-        member.experience && `Experience: ${member.experience}`,
-        member.preferredTime && `Prefers ${member.preferredTime}`,
-        member.medical && "Has a health note",
-        member.source && `Came via ${member.source}`,
-        `${member.visits} visit${member.visits === 1 ? "" : "s"}`,
-        member.noShows > 0 && `${member.noShows} no-show`,
-        member.upcoming > 0 && `${member.upcoming} upcoming bookings`,
-        member.membership && member.membership,
-      ].filter(Boolean) as string[]
-    : [];
-
-  const pick = (mid: string) => {
-    setId(mid);
-    setStage(0);
-  };
+function ProfileRound({ member, onNext, canNext }: { member: Member; onNext: () => void; canNext: boolean }) {
+  const [questions, setQuestions] = useState(["", "", ""]);
+  const [inference, setInference] = useState("");
+  const [evidence, setEvidence] = useState("");
+  const [verify, setVerify] = useState("");
+  const [reviewed, setReviewed] = useState(false);
+  const [checks, setChecks] = useState<string[]>([]);
+  const asks = useMemo(() => buildTruths(member, suggestPersona(member)), [member]);
+  const ready = questions[0].trim() && questions[1].trim() && inference.trim() && evidence.trim() && verify.trim();
+  const edit = () => { setReviewed(false); setChecks([]); };
+  const inputClass = "mt-2 w-full rounded-xl border border-cream-300 bg-cream-50 px-3.5 py-3 text-sm text-ink-900 outline-none placeholder:text-ink-500 focus:border-coral-600";
+  const reviewChecks = ["My questions invite an explanation, rather than yes/no answers.", "Each question connects to a detail in this profile.", "My inference is tentative and supported by recorded evidence.", "I can check my inference without leading the member.", "I will capture the member’s own words and agree a next step."];
 
   return (
-    <div className="member-profiles space-y-6">
-      <ModuleHeader section={section} title={<>Member <span className="italic font-light">Profiles</span></>} subtitle="Put a real record on screen. Read it closely, then ask: what would you ask because you know these things?" />
-
-      <DataSourcePanel />
-      {usingSamples && <p className="text-xs text-ink-500">Sample profiles are shown until the connected sheet contains member rows — the exercise works identically with live data.</p>}
-
+    <div className="space-y-6">
       <div className="grid gap-3 rounded-2xl border border-cream-300 bg-white p-4 sm:grid-cols-3">
-        {["Read the profile", "Separate facts from assumptions", "Ask with intention"].map((label, index) => <div key={label} className="flex items-center gap-3"><span className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold", member && stage >= index ? "bg-ink-900 text-white" : "bg-cream-200 text-ink-500")}>{member && stage > index ? <Check className="h-4 w-4" /> : `0${index + 1}`}</span><span className="text-xs font-semibold text-ink-600">{label}</span></div>)}
+        {["Read the random profile", "Questions & inferences", "Review & next member"].map((label, index) => <div key={label} className="flex items-center gap-3"><span className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold", index < 2 || reviewed ? "bg-ink-900 text-white" : "bg-cream-200 text-ink-500")}>{reviewed && index < 2 ? <Check className="h-4 w-4" /> : `0${index + 1}`}</span><span className="text-xs font-semibold text-ink-600">{label}</span></div>)}
       </div>
-      <div className="grid items-start gap-6 lg:grid-cols-[280px_minmax(0,1fr)] xl:grid-cols-[320px_minmax(0,1fr)]">
-        {/* Browser */}
-        <div className="rounded-3xl border border-cream-300 bg-cream-50 p-4 lg:sticky lg:top-6">
-          <div className="mb-4 flex items-center justify-between"><Eyebrow>Studio community</Eyebrow><span className="rounded-full bg-cream-200 px-2.5 py-1 text-xs font-semibold" aria-live="polite">{filtered.length} profiles</span></div>
-          <div className="mb-3 flex gap-2">
-            <div className="relative flex-1">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" />
-              <input value={query} onChange={(e) => setQuery(e.target.value)} aria-label="Search community member profiles" placeholder="Name, goal, Studio…" className="w-full rounded-full border border-cream-300 bg-white py-2 pl-9 pr-4 text-sm outline-none focus:border-ink-900" />
-            </div>
-            <button type="button" disabled={filtered.length === 0} onClick={() => { const next = filtered[Math.floor(Math.random() * filtered.length)]; if (next) pick(next.id); }} className="inline-flex items-center gap-2 rounded-full bg-ink-900 px-4 py-2 text-sm font-bold text-cream-50 hover:bg-ink-700 disabled:cursor-not-allowed disabled:opacity-40" aria-label="Select a random matching profile">
-              <Shuffle className="h-4 w-4" />
-            </button>
-          </div>
-          <div className="grid max-h-[640px] gap-2 overflow-y-auto pr-1 scrollbar-thin">
-            {filtered.map((m) => (
-              <MemberTile key={m.id} member={m} active={m.id === id} onClick={() => pick(m.id)} />
-            ))}
-            {filtered.length === 0 && <p className="text-sm text-ink-500">No members match “{query}”.</p>}
-          </div>
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
+        <div className="min-w-0 space-y-3">
+          <div className="flex items-center justify-between gap-3"><Eyebrow tone="coral">Your randomly selected member</Eyebrow><span className="rounded-full bg-cream-200 px-3 py-1 text-xs font-semibold">{member.sample ? "Sample profile" : "Connected record"}</span></div>
+          <MemberCard member={member} title="Community member · Profile" className="profile-record" />
+          <p className="px-1 text-xs leading-relaxed text-ink-500">The record is a starting point. Missing details and attendance patterns do not establish a member’s motivation or feelings.</p>
         </div>
-
-        {/* Exercise */}
         <div className="min-w-0 space-y-5">
-          {member ? (
-            <>
-              <div className="grid items-start gap-4 2xl:grid-cols-[minmax(0,1fr)_280px]">
-                <MemberCard key={member.id} member={member} highlight={stage >= 1} title="Community member · Profile" className="profile-record" />
-                <div className="flex flex-col gap-3">
-                  <div className={cn("flex-1 rounded-3xl p-5 transition-colors", stage === 2 ? "grain relative overflow-hidden bg-ink-950 text-cream-50" : "border border-cream-300 bg-cream-200/70")}>
-                    {stage === 2 && <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-coral-500/30 blur-2xl" />}
-                    <div className="relative space-y-4">
-                      {stage < 2 ? (
-                        <>
-                          <Eyebrow tone="coral">First question</Eyebrow>
-                          <p className="font-display text-2xl font-light italic">“What do you know?”</p>
-                          {stage === 1 && (
-                            <div className="animate-fade-up flex flex-wrap gap-1.5">
-                              {known.map((k) => (
-                                <Chip key={k} tone="dark" className="text-[11px]">
-                                  {k}
-                                </Chip>
-                              ))}
-                            </div>
-                          )}
-                          {stage === 0 ? (
-                            <button type="button" onClick={() => setStage(1)} className="rounded-full bg-ink-900 px-4 py-2 text-xs font-bold text-cream-50 hover:bg-ink-700">
-                              Review recorded facts
-                            </button>
-                          ) : (
-                            <button type="button" onClick={() => setStage(2)} className="inline-flex items-center gap-2 rounded-full bg-coral-500 px-4 py-2 text-xs font-bold text-white hover:bg-coral-600">
-                              Build your questions <ArrowRight className="h-3.5 w-3.5" />
-                            </button>
-                          )}
-                        </>
-                      ) : (
-                        <>
-                          <Eyebrow tone="light">The breakthrough question</Eyebrow>
-                          <p className="font-display text-2xl md:text-3xl font-light italic leading-tight">
-                            “What would you <span className="not-italic font-semibold text-coral-400">ASK</span> because you know these things?”
-                          </p>
-                          <button type="button" onClick={() => setStage(0)} className="text-[10px] font-bold uppercase tracking-[0.18em] text-cream-400 hover:text-cream-50">
-                            ↺ Reset
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {stage === 2 && (
-                <div className="animate-fade-up space-y-3">
-                  <Reveal label={`Explore ${asks.length} conversation cues`} hideLabel="Hide the questions" tone="coral">
-                    <div className="grid gap-2.5 md:grid-cols-2">
-                      {asks.map((t) => (
-                        <div key={t.id} className="flex items-start gap-3 rounded-2xl border border-cream-200 bg-white p-4 shadow-soft">
-                          <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-ink-900 font-display text-sm text-cream-50">{tagLetter[t.tag]}</span>
-                          <span>
-                            <span className="block text-[10px] font-bold uppercase tracking-wider text-ink-500">{t.tag === "Persona" ? "One level deeper" : t.tag}</span>
-                            <span className="block text-sm font-medium leading-snug">{t.trigger}.</span>
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                    <p className="mt-3 text-xs text-ink-500">These are practice cues, not verified member statements. Choose two or three relevant openings and let the member explain in their own words.</p>
-                  </Reveal>
-                  <button type="button" onClick={() => go("studio")} className="inline-flex items-center gap-2 rounded-full bg-ink-900 px-5 py-2.5 text-sm font-bold text-cream-50 hover:bg-ink-700">
-                    <Play className="h-4 w-4" /> Role-play this member in the Studio
-                  </button>
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="flex h-full min-h-[360px] flex-col items-center justify-center rounded-3xl border border-dashed border-ink-900/20 bg-cream-200/40 p-8 text-center">
-              <Sparkles className="h-6 w-6 text-coral-500" />
-              <Display size="sm" className="mt-3 font-light">
-                Pick a member to put their profile on screen.
-              </Display>
-              <p className="mt-2 max-w-sm text-sm text-ink-500">Select a profile on the left, or use shuffle. Notice the facts, then practise a curious opening question.</p>
-            </div>
-          )}
-          <QuestionCoach key={member?.id ?? "no-member"} member={member} />
+          <form onSubmit={(event) => { event.preventDefault(); if (ready) setReviewed(true); }} className="rounded-3xl border border-cream-300 bg-white p-5 shadow-soft md:p-6">
+            <Eyebrow tone="coral">Your conversation plan</Eyebrow>
+            <h2 className="mt-2 font-display text-2xl font-medium">What would you ask — and why?</h2>
+            <p className="mt-2 text-sm leading-relaxed text-ink-600">Study the profile, then write the questions you would actually ask this community member. Explain your inference and how you would check it.</p>
+            <fieldset className="mt-6 space-y-4">
+              <legend className="text-xs font-bold uppercase tracking-wider text-ink-500">01 · Your best questions</legend>
+              {questions.map((question, index) => <label key={index} className="block text-sm font-semibold">Question {index + 1}{index === 2 ? " · Optional follow-up" : " · Required"}<input required={index < 2} value={question} onChange={(event) => { edit(); setQuestions((previous) => previous.map((value, i) => i === index ? event.target.value : value)); }} placeholder={index === 0 ? "Your opening question…" : index === 1 ? "Go deeper on a relevant profile detail…" : "A follow-up you would ask after listening…"} className={inputClass} /></label>)}
+            </fieldset>
+            <fieldset className="mt-6 space-y-4">
+              <legend className="text-xs font-bold uppercase tracking-wider text-ink-500">02 · Your inference</legend>
+              <label className="block text-sm font-semibold">What might this information suggest? · Required<textarea required rows={3} value={inference} onChange={(event) => { edit(); setInference(event.target.value); }} placeholder="One possibility is… This is an inference, not a confirmed member statement." className={inputClass} /></label>
+              <label className="block text-sm font-semibold">Which recorded facts support it? · Required<textarea required rows={2} value={evidence} onChange={(event) => { edit(); setEvidence(event.target.value); }} placeholder="Point to specific information in the profile. If it is sparse, explain what remains unknown." className={inputClass} /></label>
+              <label className="block text-sm font-semibold">What would you ask to check your inference? · Required<textarea required rows={2} value={verify} onChange={(event) => { edit(); setVerify(event.target.value); }} placeholder="An open, neutral question that lets the member explain or correct your interpretation…" className={inputClass} /></label>
+            </fieldset>
+            <details className="mt-5 rounded-xl bg-cream-100 p-4"><summary className="cursor-pointer text-sm font-semibold">Need a hint?</summary><p className="mt-2 text-sm leading-relaxed text-ink-600">Notice one fact. Consider more than one possible explanation. Ask one open question, listen, then follow the member’s words. A missed booking could have several causes; the record alone cannot tell you which applies.</p></details>
+            <button type="submit" disabled={!ready || reviewed} className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-coral-600 px-5 py-3 text-sm font-bold text-white hover:bg-coral-700 disabled:cursor-not-allowed disabled:opacity-50">{reviewed ? <><Check className="h-4 w-4" /> Response ready for review</> : <>Review my questions & inference <ArrowRight className="h-4 w-4" /></>}</button>
+            <p className="mt-2 text-xs text-ink-500">Practice notes stay in this round. They are not saved to the member’s CRM record.</p>
+          </form>
+          {reviewed && <section aria-label="Response review" className="space-y-5" aria-live="polite">
+            <div className="rounded-3xl border border-sage-200 bg-white p-5 md:p-6"><Eyebrow tone="coral">Reflect on your response</Eyebrow><h2 className="mt-2 font-display text-2xl font-medium">Would these questions open a conversation?</h2><p className="mt-2 text-sm text-ink-600">Use this checklist yourself or discuss it with a facilitator. These tips do not automatically score your answer.</p><div className="mt-4 space-y-3">{reviewChecks.map((item) => <label key={item} className="flex items-start gap-3 text-sm leading-relaxed"><input type="checkbox" checked={checks.includes(item)} onChange={(event) => setChecks((previous) => event.target.checked ? [...previous, item] : previous.filter((value) => value !== item))} className="mt-1 h-4 w-4 shrink-0 accent-coral-600" />{item}</label>)}</div></div>
+            <div className="rounded-3xl border border-cream-300 bg-white p-5 md:p-6"><Eyebrow>Compare conversation approaches</Eyebrow><p className="mt-2 text-sm text-ink-600">Possible approaches for this profile. These are practice suggestions, not facts about the member.</p><div className="mt-4 grid gap-3">{asks.map((item) => <div key={item.id} className="rounded-xl bg-cream-100 p-4"><span className="text-[10px] font-bold uppercase tracking-wider text-coral-700">{item.tag === "Persona" ? "Explore without assuming" : item.tag} · {tagLetter[item.tag]}</span><p className="mt-1 text-sm leading-relaxed">{item.trigger}</p></div>)}</div></div>
+            <QuestionCoach member={member} />
+            <div className="flex flex-wrap gap-3"><button type="button" onClick={onNext} disabled={!canNext} className="inline-flex items-center gap-2 rounded-full bg-ink-900 px-5 py-3 text-sm font-bold text-white hover:bg-ink-700 disabled:opacity-50"><Shuffle className="h-4 w-4" /> Next random member</button></div>
+            <p className="text-xs text-ink-500">The next round clears these practice notes.{!canNext && " Add another member record to practise with a different profile."}</p>
+          </section>}
         </div>
       </div>
+    </div>
+  );
+}
+
+export function MemberProfiles({ section }: { section: Section; go?: (id: string) => void }) {
+  const { members, usingSamples, status } = useMembers();
+  const [id, setId] = useState<string | null>(null);
+  // Select only after the source settles so sample data does not replace a live exercise mid-round.
+  useEffect(() => {
+    if (status === "loading") return;
+    setId((previous) => members.some((member) => member.id === previous) ? previous : members[Math.floor(Math.random() * members.length)]?.id ?? null);
+  }, [members, status]);
+  const member = members.find((item) => item.id === id) ?? null;
+  const next = () => {
+    if (members.length < 2) return;
+    const current = members.findIndex((item) => item.id === id);
+    const offset = 1 + Math.floor(Math.random() * (members.length - 1));
+    setId(members[(Math.max(0, current) + offset) % members.length].id);
+    window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+  };
+  return (
+    <div className="member-profiles space-y-6">
+      <ModuleHeader section={section} title={<>Member <span className="italic font-light">Studio</span></>} subtitle="A random profile. Your best questions. Your evidence-based inference. Practise discovering the person behind the record." />
+      <DataSourcePanel />
+      {usingSamples && status !== "loading" && <p className="text-xs text-ink-500">This round uses a labelled sample profile because live member records are unavailable.</p>}
+      {status === "loading" ? <div role="status" className="rounded-3xl border border-cream-300 bg-white p-8 text-sm text-ink-600">Connecting to the member source and selecting a random profile…</div> : member ? <ProfileRound key={member.id} member={member} onNext={next} canNext={members.length > 1} /> : <p role="status">No member profiles are available. Connect or paste member records above to begin.</p>}
     </div>
   );
 }

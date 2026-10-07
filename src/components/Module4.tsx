@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ArrowRight, ShieldAlert, User, Target, Compass, Heart, Stethoscope, Activity, Footprints, Cake, Users } from "lucide-react";
 import type { Section } from "../data";
+import { QuestionInferenceGuide, type QuestionInference } from "./QuestionInferenceGuide";
 import { cn } from "../utils/cn";
 import { ModuleHeader, Statement, Card, Eyebrow, Display, Quote, Block, Lede, Chip } from "./ui";
 
@@ -13,6 +14,14 @@ const crmFields = [
   { k: "Birthday", v: "14 October", hot: false },
   { k: "Shoe size", v: "38", hot: false },
   { k: "Formats attended", v: "—", hot: false },
+];
+
+const brookeGuidance: QuestionInference[] = [
+  { evidence: "Goal on file: Get fit for July 2026 wedding.", inference: "An occasion may have motivated the goal, but the outcome Brooke values is not established by the record.", ask: "What would meaningful progress look like for you personally?", follow: "What would that change in how you feel or what you can do?" },
+  { evidence: "The recorded goal includes a July 2026 wedding date.", inference: "A dated goal can become stale. Confirm whether the occasion and timeline are still relevant before using them in a recommendation.", ask: "How has your goal changed since this was added to your profile?", follow: "What are you working towards now, and is there a timeline that matters to you?" },
+  { evidence: "Newcomer to the Method · 0 recorded visits · no formats attended.", inference: "Brooke may benefit from orientation and format guidance. Zero visits does not establish her fitness level or whether she feels nervous.", ask: "What would you like to know before your first Studio Session?", follow: "What kinds of practice have you enjoyed before?" },
+  { evidence: "Sensitive health note on file; recorded preference to limit intense cardio.", inference: "A private Instructor conversation may be helpful. The note does not establish which session or intensity is appropriate.", ask: "Is there anything you would like to discuss privately with your Instructor before the session?", follow: "Would you prefer to speak with them directly?" },
+  { evidence: "No Signature Experience preferences are confirmed in the record.", inference: "There is not enough information to choose a format for Brooke. Explore her interests before explaining relevant options.", ask: "What makes a Studio Session enjoyable and worthwhile for you?", follow: "What would you prefer more or less of in your practice?" },
 ];
 
 const rule = [
@@ -138,6 +147,7 @@ export function Module4({ section, go }: { section: Section; go?: (id: string) =
             </div>
           </div>
         </div>
+        <QuestionInferenceGuide label="Brooke · Ideal questions & tentative inferences" items={brookeGuidance} />
         {go && (
           <button type="button" onClick={() => go("members")} className="group flex w-full flex-wrap items-center justify-between gap-4 rounded-2xl border border-ink-900/10 bg-white px-6 py-4 text-left shadow-soft transition-all hover:-translate-y-0.5 hover:border-ink-900/30">
             <span>

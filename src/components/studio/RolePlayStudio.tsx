@@ -3,6 +3,7 @@ import { Users, UserRound, Eye, Sparkles } from "lucide-react";
 import type { Section } from "../../data";
 import { buildScenario, personas, suggestPersona } from "../../lib/scenarios";
 import { ModuleHeader, Eyebrow } from "../ui";
+import { MemberProfiles } from "../MemberProfiles";
 import { StudioSetup, type SetupConfig } from "./StudioSetup";
 import { StudioLive } from "./StudioLive";
 import { StudioDebrief } from "./StudioDebrief";
@@ -21,6 +22,17 @@ function useSessionReducer() {
 }
 
 export function RolePlayStudio({ section }: { section: Section }) {
+  const [mode, setMode] = useState<"member" | "group">("member");
+  return <div className="space-y-6">
+    <div className="flex flex-wrap gap-2" role="group" aria-label="Studio practice mode">
+      <button type="button" aria-pressed={mode === "member"} onClick={() => setMode("member")} className={`rounded-full border px-5 py-2.5 text-sm font-semibold ${mode === "member" ? "border-ink-900 bg-ink-900 text-white" : "border-cream-300 bg-white"}`}>Member Studio</button>
+      <button type="button" aria-pressed={mode === "group"} onClick={() => setMode("group")} className={`rounded-full border px-5 py-2.5 text-sm font-semibold ${mode === "group" ? "border-ink-900 bg-ink-900 text-white" : "border-cream-300 bg-white"}`}>Group role-play</button>
+    </div>
+    {mode === "member" ? <MemberProfiles section={section} /> : <GroupRolePlayStudio section={section} />}
+  </div>;
+}
+
+function GroupRolePlayStudio({ section }: { section: Section }) {
   const [phase, setPhase] = useState<Phase>("setup");
   const [history, setHistory] = useState<RoundSummary[]>([]);
   const [lastConfig, setLastConfig] = useState<SetupConfig | null>(null);
