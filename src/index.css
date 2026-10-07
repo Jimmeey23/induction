@@ -107,9 +107,40 @@ body {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
 }
 
+/* Hidden on screen; revealed only for printing / PDF export. */
+.print-doc {
+  display: none;
+}
+
 @media print {
   .no-print {
     display: none !important;
+  }
+  .screen-root {
+    display: none !important;
+  }
+  .print-doc {
+    display: block !important;
+    padding: 0;
+  }
+  .print-page {
+    break-after: page;
+    page-break-after: always;
+  }
+  .print-page:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+  .break-inside-avoid {
+    break-inside: avoid;
+  }
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  @page {
+    size: A4;
+    margin: 14mm;
   }
   .print-only {
     display: block !important;

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Menu, X, Play, Pause, RotateCcw, Keyboard } from "lucide-react";
+import { ChevronLeft, ChevronRight, Menu, X, Play, Pause, RotateCcw, Keyboard, FileDown, Mic, MicOff, Loader2 } from "lucide-react";
 import { sections, SESSION_MINUTES } from "./data";
 import { cn } from "./utils/cn";
 import { Overview } from "./components/Overview";
@@ -11,6 +11,8 @@ import { Module9, Module10 } from "./components/Modules9to10";
 import { CrmLoop, CheatSheet, NeverDo, Closing } from "./components/Toolkit";
 import { RolePlayStudio } from "./components/studio/RolePlayStudio";
 import { MemberProfiles } from "./components/MemberProfiles";
+import { SpeakerNotes } from "./components/SpeakerNotes";
+import { PrintDoc } from "./components/PrintDoc";
 
 /* ------------------------------------------------------------------ */
 /* Session clock (elapsed stopwatch against the 2-hour plan)           */
@@ -83,6 +85,66 @@ function SessionClock({ onJump }: { onJump: (id: string) => void }) {
   );
 }
 
+
+/* ------------------------------------------------------------------ */
+/* PDF export (renders the whole deck, then hands it to the printer)   */
+/* ------------------------------------------------------------------ */
+
+function ExportMenu({ onExport, busy }: { onExport: (withNotes: boolean) => void; busy: boolean }) {
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    const close = () => setOpen(false);
+    window.addEventListener("click", close);
+    return () => window.removeEventListener("click", close);
+  }, [open]);
+
+  return (
+    <div className="relative" onClick={(e) => e.stopPropagation()}>
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        disabled={busy}
+        className="inline-flex items-center gap-2 rounded-full border border-cream-300 bg-white px-3 py-2 text-[11px] font-bold uppercase tracking-[0.16em] text-ink-700 transition-colors hover:border-ink-900/40 disabled:opacity-60"
+        aria-label="Export the training content as a PDF"
+      >
+        {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileDown className="h-3.5 w-3.5" />}
+        <span className="hidden sm:inline">{busy ? "Preparing…" : "Export PDF"}</span>
+      </button>
+      {open && !busy && (
+        <div className="animate-fade-in absolute right-0 z-50 mt-2 w-72 overflow-hidden rounded-2xl border border-cream-300 bg-white shadow-lift">
+          <button
+            type="button"
+            onClick={() => {
+              setOpen(false);
+              onExport(true);
+            }}
+            className="block w-full px-4 py-3 text-left hover:bg-cream-100"
+          >
+            <span className="block text-sm font-semibold">Trainer pack</span>
+            <span className="block text-xs text-ink-500">All modules + toolkit, with speaker notes</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setOpen(false);
+              onExport(false);
+            }}
+            className="block w-full border-t border-cream-200 px-4 py-3 text-left hover:bg-cream-100"
+          >
+            <span className="block text-sm font-semibold">Participant pack</span>
+            <span className="block text-xs text-ink-500">Same content, speaker notes removed</span>
+          </button>
+          <p className="border-t border-cream-200 bg-cream-100 px-4 py-2.5 text-[11px] leading-relaxed text-ink-500">
+            Your browser's print dialog opens — choose <strong>Save as PDF</strong>, and turn on background graphics.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ------------------------------------------------------------------ */
 /* App                                                                 */
 /* ------------------------------------------------------------------ */
@@ -97,6 +159,8 @@ function readHash(): string {
 export default function App() {
   const [view, setView] = useState<string>(() => readHash());
   const [menuOpen, setMenuOpen] = useState(false);
+  const [notesOpen, setNotesOpen] = useState(() => localStorage.getItem("p57.notes") === "1");
+  const [printing, setPrinting] = useState<null | { withNotes: boolean }>(null);
   const mainRef = useRef<HTMLDivElement>(null);
 
   const index = ids.indexOf(view);
@@ -118,6 +182,26 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    localStorage.setItem("p57.notes", notesOpen ? "1" : "0");
+  }, [notesOpen]);
+
+  // Mount the print document, let the browser paint it, then open the dialog.
+  useEffect(() => {
+    if (!printing) return;
+    const done = () => setPrinting(null);
+    window.addEventListener("afterprint", done);
+    const id = window.setTimeout(() => {
+      window.print();
+      // Safari never fires afterprint reliably — clear anyway.
+      window.setTimeout(done, 500);
+    }, 350);
+    return () => {
+      window.clearTimeout(id);
+      window.removeEventListener("afterprint", done);
+    };
+  }, [printing]);
+
+  useEffect(() => {
     mainRef.current?.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
     window.scrollTo({ top: 0 });
   }, [view]);
@@ -131,6 +215,8 @@ export default function App() {
         if (next) go(next.id);
       } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
         if (prev) go(prev.id);
+      } else if (e.key === "n" || e.key === "N") {
+        setNotesOpen((n) => !n);
       } else if (e.key === "Escape") {
         setMenuOpen(false);
       }
@@ -230,7 +316,8 @@ export default function App() {
   );
 
   return (
-    <div className="min-h-screen bg-cream-100 lg:grid lg:grid-cols-[288px_1fr]">
+    <>
+    <div className="screen-root min-h-screen bg-cream-100 lg:grid lg:grid-cols-[288px_1fr]">
       {/* Desktop sidebar */}
       <aside className="no-print hidden lg:block sticky top-0 h-screen bg-ink-950 text-cream-50">{Nav}</aside>
 
@@ -263,7 +350,23 @@ export default function App() {
                 <div className="truncate font-display text-base md:text-lg font-medium tracking-tight">{section.label}</div>
               </div>
             </div>
-            <SessionClock onJump={go} />
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setNotesOpen((n) => !n)}
+                className={cn(
+                  "inline-flex items-center gap-2 rounded-full border px-3 py-2 text-[11px] font-bold uppercase tracking-[0.16em] transition-colors",
+                  notesOpen ? "border-ink-900 bg-ink-900 text-cream-50" : "border-cream-300 bg-white text-ink-700 hover:border-ink-900/40"
+                )}
+                aria-pressed={notesOpen}
+                title="Toggle speaker notes (N)"
+              >
+                {notesOpen ? <Mic className="h-3.5 w-3.5" /> : <MicOff className="h-3.5 w-3.5" />}
+                <span className="hidden sm:inline">Notes</span>
+              </button>
+              <ExportMenu busy={printing !== null} onExport={(withNotes) => setPrinting({ withNotes })} />
+              <SessionClock onJump={go} />
+            </div>
           </div>
           {/* Progress */}
           <div className="h-0.5 w-full bg-cream-200">
@@ -277,6 +380,7 @@ export default function App() {
               {content}
             </div>
           )}
+          {notesOpen && <SpeakerNotes id={view} className="no-print mt-14" />}
           <div className={view === "studio" ? "animate-fade-up" : "hidden"}>
             <RolePlayStudio section={sections.find((s) => s.id === "studio")!} />
           </div>
@@ -326,6 +430,8 @@ export default function App() {
         </footer>
       </div>
     </div>
+    {printing && <PrintDoc withNotes={printing.withNotes} />}
+    </>
   );
 }
 

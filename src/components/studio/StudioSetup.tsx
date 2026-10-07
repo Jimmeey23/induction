@@ -12,14 +12,13 @@ export interface SetupConfig {
   member: Member;
   persona: Persona;
   difficulty: Difficulty;
-  targetMins: number;
   names: { associate: string; client: string; observer: string };
 }
 
 const difficulties: { id: Difficulty; name: string; desc: string }[] = [
   { id: "calm", name: "Calm", desc: "No interruptions. Pure First 7 practice." },
-  { id: "realistic", name: "Realistic", desc: "The persona's pressure line + two curveballs." },
-  { id: "chaos", name: "Chaos", desc: "A curveball every ~55 seconds. Composure drill." },
+  { id: "realistic", name: "Realistic", desc: "The persona's pressure line + two manual interruptions." },
+  { id: "chaos", name: "Chaos", desc: "Several interruptions, triggered by the observer." },
 ];
 
 export function StudioSetup({ onStart, history }: { onStart: (c: SetupConfig) => void; history: RoundSummary[] }) {
@@ -28,7 +27,6 @@ export function StudioSetup({ onStart, history }: { onStart: (c: SetupConfig) =>
   const [memberId, setMemberId] = useState<string | null>(null);
   const [personaId, setPersonaId] = useState<string | "auto">("auto");
   const [difficulty, setDifficulty] = useState<Difficulty>("realistic");
-  const [targetMins, setTargetMins] = useState(6);
   const [names, setNames] = useState({ associate: "", client: "", observer: "" });
   const [peek, setPeek] = useState(false);
 
@@ -167,19 +165,6 @@ export function StudioSetup({ onStart, history }: { onStart: (c: SetupConfig) =>
               </button>
             ))}
           </div>
-          <div className="flex items-center justify-between rounded-2xl border border-cream-200 bg-white px-5 py-3.5">
-            <span>
-              <span className="block font-semibold">Target length</span>
-              <span className="block text-xs text-ink-500">The induction should land in 5–7 minutes.</span>
-            </span>
-            <div className="flex gap-1">
-              {[5, 6, 7].map((n) => (
-                <button key={n} type="button" onClick={() => setTargetMins(n)} className={cn("h-9 w-12 rounded-full text-sm font-bold transition-colors", targetMins === n ? "bg-coral-500 text-white" : "bg-cream-200 text-ink-700 hover:bg-cream-300")}>
-                  {n}′
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
 
         <div className="space-y-4">
@@ -195,7 +180,7 @@ export function StudioSetup({ onStart, history }: { onStart: (c: SetupConfig) =>
           <button
             type="button"
             disabled={!member || !persona}
-            onClick={() => member && persona && onStart({ member, persona, difficulty, targetMins, names })}
+            onClick={() => member && persona && onStart({ member, persona, difficulty, names })}
             className="group inline-flex w-full items-center justify-center gap-3 rounded-full bg-coral-500 px-7 py-4 text-sm font-bold tracking-wide text-white transition-all hover:bg-coral-600 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Play className="h-4 w-4" /> Build scenario & open role screens
@@ -210,18 +195,17 @@ export function StudioSetup({ onStart, history }: { onStart: (c: SetupConfig) =>
             <Eyebrow>Rounds so far this session</Eyebrow>
           </div>
           <div className="overflow-hidden rounded-2xl border border-cream-200 bg-white">
-            <div className="hidden grid-cols-[1.2fr_1.2fr_1fr_80px_90px_90px_90px] gap-3 border-b border-cream-200 bg-cream-100/70 px-5 py-2 text-[10px] font-bold uppercase tracking-[0.18em] text-ink-500 md:grid">
+            <div className="hidden grid-cols-[1.2fr_1.2fr_1fr_90px_90px_90px] gap-3 border-b border-cream-200 bg-cream-100/70 px-5 py-2 text-[10px] font-bold uppercase tracking-[0.18em] text-ink-500 md:grid">
               <span>Associate</span>
               <span>Member · Persona</span>
               <span>Mode</span>
-              <span>Time</span>
               <span>Steps</span>
               <span>Truths</span>
               <span>Crimes</span>
             </div>
             <ul className="divide-y divide-cream-200">
               {history.map((h) => (
-                <li key={h.at} className="grid grid-cols-2 gap-2 px-5 py-3 text-sm md:grid-cols-[1.2fr_1.2fr_1fr_80px_90px_90px_90px] md:items-center md:gap-3">
+                <li key={h.id} className="grid grid-cols-2 gap-2 px-5 py-3 text-sm md:grid-cols-[1.2fr_1.2fr_1fr_90px_90px_90px] md:items-center md:gap-3">
                   <span className="font-semibold">{h.associate}</span>
                   <span className="truncate text-ink-600">
                     {h.member} · {h.persona}
@@ -229,7 +213,6 @@ export function StudioSetup({ onStart, history }: { onStart: (c: SetupConfig) =>
                   <span>
                     <Chip>{h.difficulty}</Chip>
                   </span>
-                  <span className="font-mono tabular-nums">{Math.floor(h.secs / 60)}:{(h.secs % 60).toString().padStart(2, "0")}</span>
                   <span className="font-mono tabular-nums">{h.stepsCovered}/7</span>
                   <span className="font-mono tabular-nums">
                     {h.truthsFound}/{h.truthsTotal}

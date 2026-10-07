@@ -4,7 +4,6 @@ export type Role = "associate" | "client" | "observer";
 
 export interface FiredLine {
   id: string;
-  at: number;
   text: string;
   kind: "persona" | "client" | "event";
   delivered: boolean;
@@ -14,14 +13,14 @@ export interface FiredLine {
 export interface Session {
   scenario: Scenario;
   names: { associate: string; client: string; observer: string };
-  startedAt: number | null;
-  endedAt: number | null;
-  stepLog: { step: number; at: number }[];
-  revealed: Record<string, number>;
+  started: boolean;
+  ended: boolean;
+  stepLog: number[];
+  revealed: Record<string, boolean>;
   volunteered: Record<string, boolean>;
-  feelLog: { at: number; v: number }[];
+  feelLog: number[];
   fired: FiredLine[];
-  checks: number[];
+  checks: number;
   closedQ: number;
   openQ: number;
   crimes: Record<string, number>;
@@ -36,15 +35,15 @@ export interface Session {
 export type Action =
   | { type: "start" }
   | { type: "end" }
-  | { type: "step"; step: number; at: number }
-  | { type: "reveal"; id: string; at: number }
+  | { type: "step"; step: number }
+  | { type: "reveal"; id: string }
   | { type: "unreveal"; id: string }
   | { type: "volunteer"; id: string; on: boolean }
-  | { type: "feel"; v: number; at: number }
-  | { type: "fire"; line: { id: string; at: number; text: string; kind: FiredLine["kind"] } }
+  | { type: "feel"; v: number }
+  | { type: "fire"; line: { id: string; text: string; kind: FiredLine["kind"] } }
   | { type: "delivered"; id: string }
   | { type: "handled"; id: string; handled: boolean | null }
-  | { type: "check"; at: number }
+  | { type: "check" }
   | { type: "question"; open: boolean; delta: 1 | -1 }
   | { type: "crime"; crime: string; delta: 1 | -1 }
   | { type: "fiveC"; c: string; rating: Rating | null }
@@ -57,14 +56,14 @@ export function newSession(scenario: Scenario, names: Session["names"]): Session
   return {
     scenario,
     names,
-    startedAt: null,
-    endedAt: null,
+    started: false,
+    ended: false,
     stepLog: [],
     revealed: {},
     volunteered: {},
-    feelLog: [{ at: 0, v: 35 }],
+    feelLog: [35],
     fired: [],
-    checks: [],
+    checks: 0,
     closedQ: 0,
     openQ: 0,
     crimes: {},
@@ -80,16 +79,16 @@ export function newSession(scenario: Scenario, names: Session["names"]): Session
 export function reducer(s: Session, a: Action): Session {
   switch (a.type) {
     case "start":
-      return s.startedAt ? s : { ...s, startedAt: Date.now() };
+      return s.started ? s : { ...s, started: true };
     case "end":
-      return s.endedAt ? s : { ...s, endedAt: Date.now() };
+      return s.ended ? s : { ...s, ended: true };
     case "step": {
       const last = s.stepLog[s.stepLog.length - 1];
-      if (last && last.step === a.step) return s;
-      return { ...s, stepLog: [...s.stepLog, { step: a.step, at: a.at }] };
+      if (last === a.step) return s;
+      return { ...s, stepLog: [...s.stepLog, a.step] };
     }
     case "reveal":
-      return { ...s, revealed: { ...s.revealed, [a.id]: a.at } };
+      return { ...s, revealed: { ...s.revealed, [a.id]: true } };
     case "unreveal": {
       const r = { ...s.revealed };
       delete r[a.id];
@@ -98,7 +97,7 @@ export function reducer(s: Session, a: Action): Session {
     case "volunteer":
       return { ...s, volunteered: { ...s.volunteered, [a.id]: a.on } };
     case "feel":
-      return { ...s, feelLog: [...s.feelLog, { at: a.at, v: a.v }] };
+      return { ...s, feelLog: [...s.feelLog, a.v] };
     case "fire":
       return s.fired.some((f) => f.id === a.line.id) ? s : { ...s, fired: [...s.fired, { ...a.line, delivered: a.line.kind === "event", handled: null }] };
     case "delivered":
@@ -106,7 +105,7 @@ export function reducer(s: Session, a: Action): Session {
     case "handled":
       return { ...s, fired: s.fired.map((f) => (f.id === a.id ? { ...f, handled: a.handled } : f)) };
     case "check":
-      return { ...s, checks: [...s.checks, a.at] };
+      return { ...s, checks: s.checks + 1 };
     case "question":
       return a.open ? { ...s, openQ: Math.max(0, s.openQ + a.delta) } : { ...s, closedQ: Math.max(0, s.closedQ + a.delta) };
     case "crime": {
@@ -131,28 +130,6 @@ export function reducer(s: Session, a: Action): Session {
   }
 }
 
-export function elapsedSecs(s: Session, now: number) {
-  if (!s.startedAt) return 0;
-  return Math.max(0, Math.floor(((s.endedAt ?? now) - s.startedAt) / 1000));
-}
-
-export function fmt(sec: number) {
-  const m = Math.floor(sec / 60);
-  const r = sec % 60;
-  return `${m}:${r.toString().padStart(2, "0")}`;
-}
-
-/** Time spent in each step (seconds), computed from the step log. */
-export function stepDurations(s: Session, totalElapsed: number): Record<number, number> {
-  const out: Record<number, number> = {};
-  s.stepLog.forEach((e, i) => {
-    const next = s.stepLog[i + 1];
-    const end = next ? next.at : totalElapsed;
-    out[e.step] = (out[e.step] ?? 0) + Math.max(0, end - e.at);
-  });
-  return out;
-}
-
 export interface RoundSummary {
   id: string;
   associate: string;
@@ -160,7 +137,6 @@ export interface RoundSummary {
   member: string;
   persona: string;
   difficulty: string;
-  secs: number;
   stepsCovered: number;
   truthsFound: number;
   truthsTotal: number;
@@ -170,12 +146,9 @@ export interface RoundSummary {
   feelStart: number;
   feelEnd: number;
   fiveCs: Record<string, Rating | null>;
-  at: number;
 }
 
-export function summarize(s: Session, now: number): RoundSummary {
-  const secs = elapsedSecs(s, now);
-  const steps = new Set(s.stepLog.map((e) => e.step));
+export function summarize(s: Session): RoundSummary {
   const feel = s.feelLog;
   return {
     id: s.scenario.id,
@@ -184,16 +157,14 @@ export function summarize(s: Session, now: number): RoundSummary {
     member: s.scenario.member.name,
     persona: s.scenario.persona.name,
     difficulty: s.scenario.difficulty,
-    secs,
-    stepsCovered: steps.size,
+    stepsCovered: new Set(s.stepLog).size,
     truthsFound: Object.keys(s.revealed).length,
     truthsTotal: s.scenario.truths.length,
     curveballsHandled: s.fired.filter((f) => f.handled === true).length,
     curveballsTotal: s.fired.length,
     crimes: Object.values(s.crimes).reduce((a, b) => a + b, 0),
-    feelStart: feel[0]?.v ?? 35,
-    feelEnd: feel[feel.length - 1]?.v ?? 35,
+    feelStart: feel[0] ?? 35,
+    feelEnd: feel[feel.length - 1] ?? 35,
     fiveCs: s.fiveCs,
-    at: Date.now(),
   };
 }

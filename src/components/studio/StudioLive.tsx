@@ -4,18 +4,15 @@ import { firstSeven, crimeList, fiveCs, type Rating } from "../../lib/scenarios"
 import { cn } from "../../utils/cn";
 import { Eyebrow } from "../ui";
 import { MemberCard } from "./MemberCard";
-import { elapsedSecs, fmt, stepDurations, type Action, type Role, type Session } from "./session";
+import { type Action, type Role, type Session } from "./session";
 
 const ratings: Rating[] = ["STRONG", "DEVELOPING", "RETRY"];
 
-export function StudioLive({ session, dispatch, now, onEnd }: { session: Session; dispatch: (a: Action) => void; now: number; onEnd: () => void }) {
+export function StudioLive({ session, dispatch, onEnd }: { session: Session; dispatch: (a: Action) => void; onEnd: () => void }) {
   const [role, setRole] = useState<Role>("associate");
   const [unlocked, setUnlocked] = useState(false);
   const s = session;
-  const elapsed = elapsedSecs(s, now);
-  const started = !!s.startedAt;
-  const over = elapsed > s.scenario.targetSecs;
-  const pct = Math.min(1, elapsed / s.scenario.targetSecs);
+  const started = s.started;
 
   useEffect(() => {
     if (role !== "client") setUnlocked(false);
@@ -29,22 +26,12 @@ export function StudioLive({ session, dispatch, now, onEnd }: { session: Session
       <div className="sticky top-[57px] z-30 -mx-5 border-y border-ink-900/10 bg-cream-100/90 px-5 py-3 backdrop-blur-md md:-mx-8 md:px-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="relative h-12 w-12 shrink-0">
-              <svg viewBox="0 0 48 48" className="h-12 w-12 -rotate-90">
-                <circle cx="24" cy="24" r="20" fill="none" strokeWidth="4" className="stroke-cream-300" />
-                <circle cx="24" cy="24" r="20" fill="none" strokeWidth="4" strokeLinecap="round" strokeDasharray={2 * Math.PI * 20} strokeDashoffset={2 * Math.PI * 20 * (1 - pct)} className={cn("transition-[stroke-dashoffset] duration-1000 ease-linear", over ? "stroke-coral-500" : "stroke-ink-900")} />
-              </svg>
-              <div className={cn("absolute inset-0 flex items-center justify-center font-mono text-[11px] font-bold tabular-nums", over && "text-coral-600")}>{fmt(elapsed)}</div>
-            </div>
             <div className="min-w-0">
               <div className="truncate font-display text-lg font-medium tracking-tight">
                 {s.scenario.member.name}
                 {role !== "associate" && <span className="text-ink-400"> · {s.scenario.persona.name}</span>}
               </div>
-              <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-ink-500">
-                Target {fmt(s.scenario.targetSecs)} · {s.scenario.difficulty}
-                {over && <span className="ml-2 text-coral-600">Over time</span>}
-              </div>
+              <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-ink-500">{s.scenario.difficulty} practice</div>
             </div>
           </div>
 
@@ -84,9 +71,9 @@ export function StudioLive({ session, dispatch, now, onEnd }: { session: Session
         </div>
       </div>
 
-      {role === "associate" && <AssociateView s={s} dispatch={dispatch} elapsed={elapsed} />}
-      {role === "client" && (unlocked ? <ClientView s={s} dispatch={dispatch} elapsed={elapsed} /> : <LockScreen name={s.names.client} onUnlock={() => setUnlocked(true)} />)}
-      {role === "observer" && <ObserverView s={s} dispatch={dispatch} elapsed={elapsed} />}
+      {role === "associate" && <AssociateView s={s} dispatch={dispatch} />}
+      {role === "client" && (unlocked ? <ClientView s={s} dispatch={dispatch} /> : <LockScreen name={s.names.client} onUnlock={() => setUnlocked(true)} />)}
+      {role === "observer" && <ObserverView s={s} dispatch={dispatch} />}
     </div>
   );
 }
@@ -117,14 +104,13 @@ function LockScreen({ name, onUnlock }: { name: string; onUnlock: () => void }) 
 /* Associate                                                           */
 /* ------------------------------------------------------------------ */
 
-function AssociateView({ s, dispatch, elapsed }: { s: Session; dispatch: (a: Action) => void; elapsed: number }) {
-  const current = s.stepLog[s.stepLog.length - 1]?.step ?? 0;
-  const durations = stepDurations(s, elapsed);
-  const started = !!s.startedAt;
+function AssociateView({ s, dispatch }: { s: Session; dispatch: (a: Action) => void }) {
+  const current = s.stepLog[s.stepLog.length - 1] ?? 0;
+  const started = s.started;
 
   const startStep = (n: number) => {
     if (!started) dispatch({ type: "start" });
-    dispatch({ type: "step", step: n, at: started ? elapsed : 0 });
+    dispatch({ type: "step", step: n });
   };
 
   return (
@@ -156,10 +142,8 @@ function AssociateView({ s, dispatch, elapsed }: { s: Session; dispatch: (a: Act
         </div>
         <ol className="space-y-2">
           {firstSeven.map((st) => {
-            const active = current === st.n && !s.endedAt;
-            const done = durations[st.n] !== undefined && !active;
-            const secs = durations[st.n] ?? 0;
-            const long = secs > st.target * 1.6;
+            const active = current === st.n && !s.ended;
+            const done = s.stepLog.includes(st.n) && !active;
             return (
               <li key={st.n}>
                 <button
@@ -175,9 +159,8 @@ function AssociateView({ s, dispatch, elapsed }: { s: Session; dispatch: (a: Act
                     <span className="block font-display text-xl font-medium uppercase tracking-tight">{st.name}</span>
                     <span className={cn("block text-sm", active ? "text-white/85" : done ? "text-cream-300" : "text-ink-500")}>{st.mantra}</span>
                   </span>
-                  <span className="text-right">
-                    <span className={cn("block font-mono text-sm font-bold tabular-nums", long && !active && "text-coral-400", long && active && "text-white")}>{active || done ? fmt(secs) : `~${st.target}s`}</span>
-                    <span className={cn("block text-[10px] font-bold uppercase tracking-wider", active ? "text-white/70" : done ? "text-cream-400" : "text-ink-400")}>{active ? "now" : done ? "done" : "guide"}</span>
+                  <span className={cn("text-right text-[10px] font-bold uppercase tracking-wider", active ? "text-white/80" : done ? "text-cream-400" : "text-ink-400")}>
+                    {active ? "Current" : done ? "Done" : "To do"}
                   </span>
                 </button>
               </li>
@@ -189,7 +172,7 @@ function AssociateView({ s, dispatch, elapsed }: { s: Session; dispatch: (a: Act
           <button
             type="button"
             disabled={!started}
-            onClick={() => dispatch({ type: "check", at: elapsed })}
+            onClick={() => dispatch({ type: "check" })}
             className="flex items-center gap-3 rounded-2xl border border-sage-500 bg-sage-200/40 p-4 text-left transition-colors hover:bg-sage-200/70 disabled:opacity-50"
           >
             <HelpCircle className="h-6 w-6 shrink-0 text-sage-700" />
@@ -214,7 +197,7 @@ function AssociateView({ s, dispatch, elapsed }: { s: Session; dispatch: (a: Act
 
 const feelLabels = ["Lost", "Unsure", "Okay", "Comfortable", "Confident"];
 
-function ClientView({ s, dispatch, elapsed }: { s: Session; dispatch: (a: Action) => void; elapsed: number }) {
+function ClientView({ s, dispatch }: { s: Session; dispatch: (a: Action) => void }) {
   const p = s.scenario.persona;
   const m = s.scenario.member;
   const last = s.feelLog[s.feelLog.length - 1]?.v ?? 35;
@@ -286,9 +269,9 @@ function ClientView({ s, dispatch, elapsed }: { s: Session; dispatch: (a: Action
               max={100}
               value={feel}
               onChange={(e) => setFeel(Number(e.target.value))}
-              onMouseUp={() => dispatch({ type: "feel", v: feel, at: elapsed })}
-              onTouchEnd={() => dispatch({ type: "feel", v: feel, at: elapsed })}
-              onKeyUp={() => dispatch({ type: "feel", v: feel, at: elapsed })}
+              onMouseUp={() => dispatch({ type: "feel", v: feel })}
+              onTouchEnd={() => dispatch({ type: "feel", v: feel })}
+              onKeyUp={() => dispatch({ type: "feel", v: feel })}
               className="mt-4 w-full accent-coral-500"
             />
             <div className="mt-1 flex justify-between text-[10px] font-bold uppercase tracking-wider text-ink-400">
@@ -315,7 +298,6 @@ function ClientView({ s, dispatch, elapsed }: { s: Session; dispatch: (a: Action
               <div key={t.id} className={cn("rounded-3xl border p-5 transition-all", on ? "border-sage-500 bg-sage-200/30" : "border-cream-200 bg-white shadow-soft")}>
                 <div className="flex items-start justify-between gap-3">
                   <span className={cn("rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider", on ? "bg-sage-700 text-white" : "bg-cream-200 text-ink-700")}>{t.tag}</span>
-                  {on && <span className="font-mono text-[11px] text-sage-700">revealed at {fmt(s.revealed[t.id])}</span>}
                 </div>
                 <div className="mt-3 text-[11px] font-bold uppercase tracking-[0.16em] text-ink-500">Only if the associate…</div>
                 <p className="mt-0.5 text-sm font-semibold text-ink-800">{t.trigger}</p>
@@ -327,7 +309,7 @@ function ClientView({ s, dispatch, elapsed }: { s: Session; dispatch: (a: Action
                       <Undo2 className="h-3.5 w-3.5" /> Undo
                     </button>
                   ) : (
-                    <button type="button" onClick={() => dispatch({ type: "reveal", id: t.id, at: elapsed })} className="inline-flex items-center gap-1.5 rounded-full bg-sage-700 px-4 py-2 text-xs font-bold text-white hover:bg-sage-500">
+                    <button type="button" onClick={() => dispatch({ type: "reveal", id: t.id })} className="inline-flex items-center gap-1.5 rounded-full bg-sage-700 px-4 py-2 text-xs font-bold text-white hover:bg-sage-500">
                       <Check className="h-3.5 w-3.5" /> They earned it — revealed
                     </button>
                   )}
@@ -349,7 +331,7 @@ function ClientView({ s, dispatch, elapsed }: { s: Session; dispatch: (a: Action
               <ul className="mt-2 space-y-1 text-ink-700">
                 {delivered.map((f) => (
                   <li key={f.id} className="flex items-center gap-2">
-                    <Check className="h-3.5 w-3.5 text-sage-700" /> “{f.text}” <span className="font-mono text-[11px] text-ink-400">{fmt(f.at)}</span>
+                    <Check className="h-3.5 w-3.5 text-sage-700" /> “{f.text}”
                   </li>
                 ))}
               </ul>
@@ -365,16 +347,8 @@ function ClientView({ s, dispatch, elapsed }: { s: Session; dispatch: (a: Action
 /* Observer                                                            */
 /* ------------------------------------------------------------------ */
 
-function ObserverView({ s, dispatch, elapsed }: { s: Session; dispatch: (a: Action) => void; elapsed: number }) {
-  const truthById = Object.fromEntries(s.scenario.truths.map((t) => [t.id, t]));
-  const events = [
-    ...s.stepLog.map((e) => ({ at: e.at, text: `Step ${e.step} · ${firstSeven[e.step - 1].name}`, kind: "step" as const })),
-    ...Object.entries(s.revealed).map(([id, at]) => ({ at, text: `Discovered: ${truthById[id]?.tag ?? "truth"}`, kind: "truth" as const })),
-    ...s.fired.map((f) => ({ at: f.at, text: f.kind === "event" ? `Situation: ${f.text}` : `Curveball: “${f.text}”`, kind: "curve" as const })),
-    ...s.checks.map((at) => ({ at, text: "“Let me check that for you.”", kind: "check" as const })),
-  ].sort((a, b) => a.at - b.at);
-
-  const upcoming = s.scenario.schedule.filter((l) => !s.fired.some((f) => f.id === l.id));
+function ObserverView({ s, dispatch }: { s: Session; dispatch: (a: Action) => void }) {
+  const available = s.scenario.interruptions.filter((l) => !s.fired.some((f) => f.id === l.id));
   const pendingEvents = s.fired.filter((f) => f.kind === "event" && f.handled === null);
 
   return (

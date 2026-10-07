@@ -16,7 +16,6 @@ export interface Truth {
 
 export interface ScheduledLine {
   id: string;
-  at: number; // seconds into the induction
   text: string;
   kind: "persona" | "client" | "event";
 }
@@ -43,10 +42,8 @@ export interface Scenario {
   member: Member;
   persona: Persona;
   truths: Truth[];
-  schedule: ScheduledLine[];
+  interruptions: ScheduledLine[];
   difficulty: Difficulty;
-  targetSecs: number;
-  createdAt: number;
 }
 
 const has = (v: string | undefined, re: RegExp) => !!v && re.test(v);
@@ -74,7 +71,7 @@ export const personas: Persona[] = [
       reveal: `I tried a gym once and quit in two weeks because nobody explained anything. I don't want that to happen again, honestly.`,
       crm: `First-visit confidence is low; prior gym experience ended badly because nothing was explained. Introduce to the trainer before class.`,
     }),
-    pressure: () => [{ id: "p-nervous", at: 150, text: "Is everyone in the class going to be… really fit?", kind: "persona" }],
+    pressure: () => [{ id: "p-nervous", text: "Is everyone in the class going to be… really fit?", kind: "persona" }],
   },
   {
     id: "gym",
@@ -94,7 +91,7 @@ export const personas: Persona[] = [
       reveal: `I've plateaued for months. My lifts aren't moving and my lower back complains after heavy days. I'm here for something that makes the lifting better — not to replace it.`,
       crm: `Experienced lifter (${m.experience || "gym regular"}); plateaued, lower back fatigue after heavy sessions. Interested in formats that complement lifting.`,
     }),
-    pressure: () => [{ id: "p-gym", at: 180, text: "So how heavy do you actually go in Strength Lab?", kind: "persona" }],
+    pressure: () => [{ id: "p-gym", text: "So how heavy do you actually go in Strength Lab?", kind: "persona" }],
   },
   {
     id: "occasion",
@@ -113,7 +110,7 @@ export const personas: Persona[] = [
       reveal: `I really want stronger arms and core, and I want to feel confident in my clothes. The date is the pressure, not the point.`,
       crm: `Goal detail: wants to feel stronger (arms/core) and confident in clothes; ${m.goal ? `date-driven (${m.goal})` : "date-driven"}.`,
     }),
-    pressure: () => [{ id: "p-occasion", at: 200, text: "Realistically — how much can I change before then?", kind: "persona" }],
+    pressure: () => [{ id: "p-occasion", text: "Realistically — how much can I change before then?", kind: "persona" }],
   },
   {
     id: "exec",
@@ -132,7 +129,7 @@ export const personas: Persona[] = [
       reveal: `I'm away two weeks a month. If I can't book the week I'm back, I won't come. I'd love someone to just tell me the three things I must know.`,
       crm: `Travels ~2 weeks/month; needs booking flow explained for the weeks in town. ${m.preferredTime ? `Prefers ${m.preferredTime}.` : ""} Keep touchpoints short.`,
     }),
-    pressure: () => [{ id: "p-exec", at: 120, text: "Sorry, I have a call in five minutes.", kind: "persona" }],
+    pressure: () => [{ id: "p-exec", text: "Sorry, I have a call in five minutes.", kind: "persona" }],
   },
   {
     id: "silent",
@@ -151,7 +148,7 @@ export const personas: Persona[] = [
       reveal: `…My sister signed me up. I didn't choose this. But I do want to feel less tired all the time.`,
       crm: `Signed up by a family member; personal motivation is energy/fatigue rather than aesthetics. Open questions work; closed ones don't.`,
     }),
-    pressure: () => [{ id: "p-silent", at: 160, text: "(Look at your phone. Answer the next question with 'not really'.)", kind: "persona" }],
+    pressure: () => [{ id: "p-silent", text: "(Look at your phone. Answer the next question with 'not really'.)", kind: "persona" }],
   },
   {
     id: "enthusiast",
@@ -171,7 +168,7 @@ export const personas: Persona[] = [
       reveal: `I burn out. Every time. Three weeks of everything, then nothing. I probably need someone to slow me down — but don't tell me that.`,
       crm: `High initial intent; history of burnout after 2–3 weeks. Suggest trainer conversation on pacing; follow up at week 2.`,
     }),
-    pressure: () => [{ id: "p-enth", at: 140, text: "Can I do Barre and PowerCycle back-to-back tomorrow?", kind: "persona" }],
+    pressure: () => [{ id: "p-enth", text: "Can I do Barre and PowerCycle back-to-back tomorrow?", kind: "persona" }],
   },
   {
     id: "cautious",
@@ -190,7 +187,7 @@ export const personas: Persona[] = [
       reveal: `Yes. ${m.medical ? "What's on file is right, but" : "There's a note on my file, and"} I'd rather tell the trainer myself, quietly, before class. Please don't announce it.`,
       crm: `Prefers to brief trainers personally before class; flag "introduce to trainer 5 min early". Do not discuss health notes at the desk.`,
     }),
-    pressure: () => [{ id: "p-cautious", at: 170, text: "I have an injury. Which class is safe for me?", kind: "persona" }],
+    pressure: () => [{ id: "p-cautious", text: "I have an injury. Which class is safe for me?", kind: "persona" }],
   },
   {
     id: "sceptic",
@@ -210,7 +207,7 @@ export const personas: Persona[] = [
       reveal: `Honestly, I was rushed through the signup. ${m.noShows ? "I missed a class because I didn't know how to cancel on the app." : "I don't know how the waitlist works and I didn't want to ask."}`,
       crm: `Felt rushed at signup; needs booking/cancellation/waitlist shown on the app, not described. ${m.noShows ? "No-show was a process gap, not disinterest." : ""}`,
     }),
-    pressure: () => [{ id: "p-sceptic", at: 150, text: "Nobody told me that when I bought the package.", kind: "persona" }],
+    pressure: () => [{ id: "p-sceptic", text: "Nobody told me that when I bought the package.", kind: "persona" }],
   },
 ];
 
@@ -371,32 +368,27 @@ function pick<T>(arr: T[], n: number): T[] {
   return out;
 }
 
-export function buildSchedule(persona: Persona, member: Member, difficulty: Difficulty, targetSecs: number): ScheduledLine[] {
+export function buildInterruptions(persona: Persona, member: Member, difficulty: Difficulty): ScheduledLine[] {
   const lines: ScheduledLine[] = difficulty === "calm" ? [] : persona.pressure(member);
-  const count = difficulty === "calm" ? 0 : difficulty === "realistic" ? 2 : Math.max(4, Math.floor(targetSecs / 55));
+  const count = difficulty === "calm" ? 0 : difficulty === "realistic" ? 2 : 4;
   const picks = pick(
     curveballDeck.filter((c) => !lines.some((l) => l.text === c.text)),
     count
   );
-  const window = targetSecs - 60;
   picks.forEach((c, i) => {
-    const at = difficulty === "chaos" ? 60 + i * 55 + Math.floor(Math.random() * 15) : 75 + Math.floor(((i + 0.5) * window) / count + (Math.random() * 30 - 15));
-    lines.push({ id: `c-${i}-${Date.now()}`, at: Math.max(45, Math.min(targetSecs + 30, at)), text: c.text, kind: c.kind });
+    lines.push({ id: `c-${i}-${Date.now()}`, text: c.text, kind: c.kind });
   });
-  return lines.sort((a, b) => a.at - b.at);
+  return lines;
 }
 
-export function buildScenario(member: Member, persona: Persona, difficulty: Difficulty, targetMins: number): Scenario {
-  const targetSecs = targetMins * 60;
+export function buildScenario(member: Member, persona: Persona, difficulty: Difficulty): Scenario {
   return {
     id: `${member.id}-${persona.id}-${Date.now()}`,
     member,
     persona,
     truths: buildTruths(member, persona),
-    schedule: buildSchedule(persona, member, difficulty, targetSecs),
+    interruptions: buildInterruptions(persona, member, difficulty),
     difficulty,
-    targetSecs,
-    createdAt: Date.now(),
   };
 }
 

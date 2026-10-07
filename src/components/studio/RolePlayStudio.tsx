@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useReducer, useRef, useState } from "react";
+import { useCallback, useReducer, useRef, useState } from "react";
 import { Users, UserRound, Eye, Sparkles } from "lucide-react";
 import type { Section } from "../../data";
 import { buildScenario, personas, suggestPersona } from "../../lib/scenarios";
@@ -6,7 +6,7 @@ import { ModuleHeader, Eyebrow } from "../ui";
 import { StudioSetup, type SetupConfig } from "./StudioSetup";
 import { StudioLive } from "./StudioLive";
 import { StudioDebrief } from "./StudioDebrief";
-import { elapsedSecs, newSession, reducer, summarize, type Action, type RoundSummary, type Session } from "./session";
+import { newSession, reducer, summarize, type Action, type RoundSummary, type Session } from "./session";
 
 type Phase = "setup" | "live" | "debrief";
 
@@ -25,33 +25,13 @@ export function RolePlayStudio({ section }: { section: Section }) {
   const [history, setHistory] = useState<RoundSummary[]>([]);
   const [lastConfig, setLastConfig] = useState<SetupConfig | null>(null);
   const { session, dispatch, load } = useSessionReducer();
-  const [now, setNow] = useState(Date.now());
   const topRef = useRef<HTMLDivElement>(null);
-
-  // Clock
-  useEffect(() => {
-    if (phase !== "live" || !session?.startedAt || session.endedAt) return;
-    const id = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => window.clearInterval(id);
-  }, [phase, session?.startedAt, session?.endedAt]);
-
-  // Fire scheduled lines
-  useEffect(() => {
-    if (!session || !session.startedAt || session.endedAt) return;
-    const elapsed = elapsedSecs(session, now);
-    session.scenario.schedule.forEach((l) => {
-      if (l.at <= elapsed && !session.fired.some((f) => f.id === l.id)) {
-        dispatch({ type: "fire", line: { id: l.id, at: elapsed, text: l.text, kind: l.kind } });
-      }
-    });
-  }, [now, session, dispatch]);
 
   const scrollTop = () => topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
 
   const start = (c: SetupConfig) => {
     setLastConfig(c);
-    load(newSession(buildScenario(c.member, c.persona, c.difficulty, c.targetMins), c.names));
-    setNow(Date.now());
+    load(newSession(buildScenario(c.member, c.persona, c.difficulty), c.names));
     setPhase("live");
     scrollTop();
   };
@@ -59,13 +39,12 @@ export function RolePlayStudio({ section }: { section: Section }) {
   const end = () => {
     if (!session) return;
     dispatch({ type: "end" });
-    setNow(Date.now());
     setPhase("debrief");
     scrollTop();
   };
 
   const finishRound = () => {
-    if (session) setHistory((h) => [summarize(session, now), ...h]);
+    if (session) setHistory((h) => [summarize(session), ...h]);
   };
 
   const again = () => {
@@ -91,7 +70,7 @@ export function RolePlayStudio({ section }: { section: Section }) {
         <div className="mt-6 grid gap-3 sm:grid-cols-3">
           {[
             [UserRound, "Associate", "Sees only the CRM profile. Runs the First 7 and taps each step as they go."],
-            [Users, "Client", "Sees the secret persona, the hidden truths and timed pressure lines. Reveals only what's earned."],
+            [Users, "Client", "Sees the secret persona, the hidden truths and pressure lines. Reveals only what's earned."],
             [Eye, "Observer", "Counts open vs closed questions, spots crimes, rates the 5 Cs, triggers interruptions."],
           ].map(([I, t, d]) => {
             const Icon = I as typeof Users;
@@ -128,8 +107,8 @@ export function RolePlayStudio({ section }: { section: Section }) {
       </div>
 
       {phase === "setup" && <StudioSetup onStart={start} history={history} />}
-      {phase === "live" && session && <StudioLive session={session} dispatch={dispatch} now={now} onEnd={end} />}
-      {phase === "debrief" && session && <StudioDebrief session={session} dispatch={dispatch} elapsed={elapsedSecs(session, now)} onAgain={again} onNew={fresh} />}
+      {phase === "live" && session && <StudioLive session={session} dispatch={dispatch} onEnd={end} />}
+      {phase === "debrief" && session && <StudioDebrief session={session} dispatch={dispatch} onAgain={again} onNew={fresh} />}
 
       {phase !== "setup" && (
         <div className="rounded-2xl border border-dashed border-ink-900/15 p-4 text-xs text-ink-500">

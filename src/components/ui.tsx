@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { cn } from "../utils/cn";
+import { useIsPrinting } from "./printContext";
 import { Play, Pause, RotateCcw, Eye, EyeOff, Check, X, Timer } from "lucide-react";
 import type { Section } from "../data";
 
@@ -315,13 +316,15 @@ export function Reveal({
   tone?: "dark" | "light" | "coral";
 }) {
   const [open, setOpen] = useState(false);
+  const printing = useIsPrinting();
+  const shown = open || printing;
   return (
     <div className={cn("space-y-4", className)}>
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
         className={cn(
-          "group inline-flex items-center gap-2.5 rounded-full px-5 py-2.5 text-sm font-bold tracking-wide transition-all",
+          "no-print group inline-flex items-center gap-2.5 rounded-full px-5 py-2.5 text-sm font-bold tracking-wide transition-all",
           tone === "dark" && "bg-ink-900 text-cream-50 hover:bg-ink-700",
           tone === "light" && "bg-white text-ink-900 border border-ink-900/15 hover:border-ink-900/40",
           tone === "coral" && "bg-coral-500 text-white hover:bg-coral-600"
@@ -330,7 +333,7 @@ export function Reveal({
         {open ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
         {open ? hideLabel : label}
       </button>
-      {open && <div className="animate-fade-up">{children}</div>}
+      {shown && <div className={printing ? undefined : "animate-fade-up"}>{children}</div>}
     </div>
   );
 }

@@ -3,7 +3,7 @@ import { Check, X, Plus, RotateCcw, Shuffle, Brain, Ear, Database, AlertCircle, 
 import { firstSeven, fiveCs } from "../../lib/scenarios";
 import { cn } from "../../utils/cn";
 import { Eyebrow, Display, Statement } from "../ui";
-import { fmt, stepDurations, type Action, type Session } from "./session";
+import { type Action, type Session } from "./session";
 
 function ListBuilder({ title, icon, placeholder, items, onChange, dark }: { title: string; icon: React.ReactNode; placeholder: string; items: string[]; onChange: (i: string[]) => void; dark?: boolean }) {
   const [v, setV] = useState("");
@@ -43,35 +43,32 @@ function ListBuilder({ title, icon, placeholder, items, onChange, dark }: { titl
   );
 }
 
-function Sparkline({ points, total }: { points: { at: number; v: number }[]; total: number }) {
+function Sparkline({ points }: { points: number[] }) {
   const W = 320;
   const H = 80;
-  const span = Math.max(total, points[points.length - 1]?.at ?? 1, 1);
-  const pts = [...points, { at: span, v: points[points.length - 1]?.v ?? 35 }];
-  const d = pts.map((p, i) => `${i === 0 ? "M" : "L"}${(p.at / span) * W},${H - (p.v / 100) * H}`).join(" ");
+  const plotted = points.length > 1 ? points : [points[0] ?? 35, points[0] ?? 35];
+  const d = plotted.map((v, i) => `${i === 0 ? "M" : "L"}${(i / (plotted.length - 1)) * W},${H - (v / 100) * H}`).join(" ");
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="h-20 w-full">
       <line x1="0" y1={H * 0.5} x2={W} y2={H * 0.5} className="stroke-cream-300" strokeDasharray="3 3" />
       <path d={d} fill="none" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" className="stroke-coral-500" />
-      {pts.map((p, i) => (
-        <circle key={i} cx={(p.at / span) * W} cy={H - (p.v / 100) * H} r="3.5" className="fill-ink-900" />
+      {plotted.map((v, i) => (
+        <circle key={i} cx={(i / (plotted.length - 1)) * W} cy={H - (v / 100) * H} r="3.5" className="fill-ink-900" />
       ))}
     </svg>
   );
 }
 
-export function StudioDebrief({ session, dispatch, elapsed, onAgain, onNew }: { session: Session; dispatch: (a: Action) => void; elapsed: number; onAgain: () => void; onNew: () => void }) {
+export function StudioDebrief({ session, dispatch, onAgain, onNew }: { session: Session; dispatch: (a: Action) => void; onAgain: () => void; onNew: () => void }) {
   const s = session;
   const m = s.scenario.member;
-  const durations = stepDurations(s, elapsed);
-  const covered = new Set(s.stepLog.map((e) => e.step));
+  const covered = new Set(s.stepLog);
   const found = s.scenario.truths.filter((t) => s.revealed[t.id] !== undefined);
   const missed = s.scenario.truths.filter((t) => s.revealed[t.id] === undefined);
   const gaveAway = s.scenario.truths.filter((t) => s.volunteered[t.id]);
   const crimesTotal = Object.values(s.crimes).reduce((a, b) => a + b, 0);
-  const within = elapsed >= 300 && elapsed <= 420;
-  const feelStart = s.feelLog[0]?.v ?? 35;
-  const feelEnd = s.feelLog[s.feelLog.length - 1]?.v ?? 35;
+  const feelStart = s.feelLog[0] ?? 35;
+  const feelEnd = s.feelLog[s.feelLog.length - 1] ?? 35;
 
   useEffect(() => {
     if (s.crmDraft) return;
@@ -98,9 +95,8 @@ export function StudioDebrief({ session, dispatch, elapsed, onAgain, onNew }: { 
             </Display>
             <p className="text-cream-300">The client's objective was: <span className="text-cream-50">{s.scenario.persona.objective}</span></p>
           </div>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-2">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {[
-              ["Time", fmt(elapsed), within ? "in the 5–7 window" : elapsed < 300 ? "under 5 min" : "over 7 min", within],
               ["Steps", `${covered.size}/7`, covered.size === 7 ? "complete" : `${7 - covered.size} missed`, covered.size === 7],
               ["Discovered", `${found.length}/${s.scenario.truths.length}`, found.length >= Math.ceil(s.scenario.truths.length / 2) ? "good curiosity" : "ask deeper", found.length >= Math.ceil(s.scenario.truths.length / 2)],
               ["Client felt", `${feelStart}→${feelEnd}`, feelEnd > feelStart ? "more confident" : "no lift", feelEnd > feelStart],
@@ -126,7 +122,6 @@ export function StudioDebrief({ session, dispatch, elapsed, onAgain, onNew }: { 
               <div key={t.id} className="rounded-2xl border border-sage-500 bg-sage-200/30 p-4">
                 <div className="flex items-center justify-between">
                   <span className="rounded-full bg-sage-700 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">{t.tag}</span>
-                  <span className="font-mono text-[11px] text-sage-700">{fmt(s.revealed[t.id])}</span>
                 </div>
                 <p className="mt-2 font-display text-lg italic font-light leading-snug">“{t.reveal}”</p>
                 {s.volunteered[t.id] && (
@@ -163,23 +158,14 @@ export function StudioDebrief({ session, dispatch, elapsed, onAgain, onNew }: { 
       {/* Steps + feel + curveballs */}
       <section className="grid gap-4 lg:grid-cols-3">
         <div className="rounded-3xl border border-cream-200 bg-white p-5 shadow-soft">
-          <Eyebrow tone="coral">Time per step</Eyebrow>
+          <Eyebrow tone="coral">The First 7</Eyebrow>
           <ul className="mt-4 space-y-2.5">
             {firstSeven.map((st) => {
-              const secs = durations[st.n];
-              const w = secs ? Math.min(100, (secs / 150) * 100) : 0;
-              const long = secs !== undefined && secs > st.target * 1.6;
+              const complete = covered.has(st.n);
               return (
-                <li key={st.n} className="text-sm">
-                  <div className="flex items-center justify-between">
-                    <span className={cn("font-semibold", secs === undefined && "text-ink-400 line-through")}>
-                      {st.n}. {st.name}
-                    </span>
-                    <span className={cn("font-mono text-[11px]", long ? "text-coral-600" : "text-ink-500")}>{secs !== undefined ? fmt(secs) : "skipped"}</span>
-                  </div>
-                  <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-cream-200">
-                    <div className={cn("h-full rounded-full", long ? "bg-coral-500" : "bg-ink-900")} style={{ width: `${w}%` }} />
-                  </div>
+                <li key={st.n} className="flex items-center justify-between gap-3 text-sm">
+                  <span className={cn("font-semibold", !complete && "text-ink-400")}>{st.n}. {st.name}</span>
+                  <span className={cn("text-[10px] font-bold uppercase tracking-wider", complete ? "text-sage-700" : "text-ink-400")}>{complete ? "Covered" : "Not covered"}</span>
                 </li>
               );
             })}
@@ -189,17 +175,17 @@ export function StudioDebrief({ session, dispatch, elapsed, onAgain, onNew }: { 
         <div className="rounded-3xl border border-cream-200 bg-white p-5 shadow-soft">
           <Eyebrow tone="coral">How the client felt</Eyebrow>
           <div className="mt-4">
-            <Sparkline points={s.feelLog} total={elapsed} />
+            <Sparkline points={s.feelLog} />
           </div>
           <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider text-ink-400">
-            <span>Start</span>
-            <span>End · {fmt(elapsed)}</span>
+            <span>Initial</span>
+            <span>Final</span>
           </div>
           <div className="mt-4 grid grid-cols-3 gap-2 text-center">
             {[
               ["Open Qs", s.openQ],
               ["Closed Qs", s.closedQ],
-              ["Checked", s.checks.length],
+              ["Checked", s.checks],
             ].map(([k, v]) => (
               <div key={k as string} className="rounded-2xl bg-cream-100 p-3">
                 <div className="font-display text-2xl">{v as number}</div>
