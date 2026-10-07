@@ -11,6 +11,7 @@ import { Module9, Module10 } from "./components/Modules9to10";
 import { CrmLoop, CheatSheet, NeverDo, Closing } from "./components/Toolkit";
 import { RolePlayStudio } from "./components/studio/RolePlayStudio";
 import { MemberProfiles } from "./components/MemberProfiles";
+import { PolicyPack } from "./components/PolicyPack";
 import { DockedSpeakerNotes } from "./components/SpeakerNotes";
 import { PrintDoc } from "./components/PrintDoc";
 
@@ -193,6 +194,8 @@ export default function App() {
         return <MemberProfiles section={section} go={go} />;
       case "loop":
         return <CrmLoop section={section} />;
+      case "policy":
+        return <PolicyPack section={section} />;
       case "cheat":
         return <CheatSheet section={section} />;
       case "never":

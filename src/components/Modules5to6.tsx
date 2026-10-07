@@ -157,10 +157,44 @@ export function Module5({ section }: { section: Section }) {
 /* ================================================================== */
 
 const formats = [
-  { name: "Barre", desc: "Controlled, precise, full-body muscular endurance." },
+  { name: "Barre 57", desc: "Controlled, precise, full-body muscular endurance. Where everyone starts." },
   { name: "Strength Lab", desc: "Heavier resistance, progressive strength development, more recovery between sets." },
   { name: "FIT", desc: "Functional strength + conditioning through timed intervals." },
-  { name: "PowerCycle", desc: "Cardio-led cycling with coached intensity." },
+  { name: "powerCycle", desc: "Cardio-led rhythm cycling with coached intensity, watts and kilometres tracked." },
+];
+
+/** The policies members ask about most — said as care, not as rules. */
+const policyLines: { rule: string; dont: string; doIt: string; why: string }[] = [
+  {
+    rule: "The doors",
+    dont: "Our policy is that doors lock ten minutes after the start time.",
+    doIt: "One thing worth knowing: we close the doors ten minutes in — five for powerCycle — so give yourself a little buffer and you'll never be caught out.",
+    why: "A late entry means a missed set-up and a disrupted room. Said at the induction, it is never a surprise later.",
+  },
+  {
+    rule: "Cancellation",
+    dont: "If you cancel late you lose the class, that's the policy.",
+    doIt: "Just so you have it: cancel up to twelve hours before and the credit comes straight back to you — twenty-four hours for a private session.",
+    why: "Places are limited, and the window is what lets somebody on the waitlist take the spot.",
+  },
+  {
+    rule: "Grip socks",
+    dont: "You have to buy grip socks, they're compulsory.",
+    doIt: "You'll need grip socks for the session — we have them at the boutique, so let's sort you a pair before you go in.",
+    why: "A barre floor is unforgiving in bare feet or ordinary socks. It is a safety item, offered before the class rather than after.",
+  },
+  {
+    rule: "Freeze & pauses",
+    dont: "Freezes have to be approved, I can't promise anything.",
+    doIt: "If travel or illness comes up, email the studio at least forty-eight hours ahead and we'll pause your membership — your validity extends by exactly the days you miss.",
+    why: "Members worry about wasting what they bought. Naming the pause at the start removes the fear before it forms.",
+  },
+  {
+    rule: "The level ladder",
+    dont: "You're not allowed into Amped Up yet.",
+    doIt: "Amped Up is phenomenal, and you'll enjoy it far more with four Barre 57 classes behind you. Let's book those, and I'll hold you a spot in week three.",
+    why: "The order protects the member. Skipping it is the commonest reason somebody stops coming in month one.",
+  },
 ];
 
 function Transformation({ n, title, children }: { n: number; title: string; children: React.ReactNode }) {
@@ -182,6 +216,34 @@ export function Module6({ section }: { section: Section }) {
 
       <Transformation n={1} title="Policies">
         <DoDont dont="Our policy states…" doIt="One important thing to remember when you're booking…" />
+        <div className="space-y-3">
+          {policyLines.map((p) => (
+            <Card key={p.rule} tone="light" className="space-y-4">
+              <div className="flex flex-wrap items-baseline justify-between gap-3">
+                <p className="font-display text-xl font-medium tracking-tight">{p.rule}</p>
+                <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-ink-400">Same rule, two deliveries</span>
+              </div>
+              <div className="grid gap-3 md:grid-cols-2">
+                <div className="rounded-2xl border border-coral-500/25 bg-coral-500/[0.06] p-4">
+                  <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-coral-700">Robotic</div>
+                  <p className="mt-1.5 text-[15px] leading-relaxed text-ink-600">“{p.dont}”</p>
+                </div>
+                <div className="rounded-2xl border border-sage-500/30 bg-sage-200/30 p-4">
+                  <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-sage-700">Human</div>
+                  <p className="mt-1.5 text-[15px] leading-relaxed text-ink-800">“{p.doIt}”</p>
+                </div>
+              </div>
+              <p className="text-sm leading-relaxed text-ink-500">
+                <span className="font-bold uppercase tracking-[0.14em] text-[10px] text-ink-400">The reason · </span>
+                {p.why}
+              </p>
+            </Card>
+          ))}
+        </div>
+        <p className="text-[15px] leading-relaxed text-ink-600">
+          Every one of these is in the <span className="font-semibold">Policies &amp; Facts Pack</span> in the toolkit,
+          along with refunds, transfers, what runs at which studio, and the claims we are allowed to make.
+        </p>
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-sm font-semibold text-ink-600 mr-1">Policies should sound</span>
           <Chip tone="sage">Clear</Chip>

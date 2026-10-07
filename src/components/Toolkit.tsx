@@ -232,6 +232,13 @@ const nevers = [
   "Treat the studio tour like pointing out emergency exits.",
   "End without a next step.",
   "Pretend to know an answer when we don't.",
+  "Match a price a member quotes at us — confirm it first, and escalate if it differs.",
+  "Promise kilograms or inches to an individual.",
+  "Say “Spinning” — it is another company's trademark. We say powerCycle, indoor or rhythm cycling.",
+  "Call it a ballet or dance class — it is barre-based fitness, and no dance experience is needed.",
+  "Offer a format a studio does not run, or a trial a city does not offer.",
+  "Open the door after the lock — ten minutes for barre and the Lab, five for powerCycle.",
+  "Repeat a member's health disclosure to anyone beyond their Instructor and the Team Leader.",
 ];
 
 export function NeverDo({ section }: { section: Section }) {

@@ -81,6 +81,11 @@ export const speakerNotes: Record<string, SpeakerNote> = {
   },
   m6: {
     script: [
+      "We will work through the three transformations \u2014 policies, formats and recommendations \u2014 using the rules members actually ask about.",
+      "For each policy you will see the robotic version and the human version of the same rule, with the reason underneath.",
+      "The reason is the part that matters. Doors close so that nobody misses a safe set-up. Cancellation windows exist so somebody on the waitlist can take the place. Grip socks are a safety item, not an upsell.",
+      "Notice that the human version never apologises for the rule and never threatens with it. It simply tells the member what they need in order to have a good experience.",
+      "The full reference \u2014 refunds, freezes, transfers, what runs at which studio, and the claims we are allowed to make \u2014 sits in the Policies and Facts Pack in the toolkit.",
       "Policies, formats and recommendations are three places where a helpful conversation can become a long speech.",
       "Explain the booking rules clearly and accurately, with enough context for the member to use them.",
       "What difference do you hear between ‘Our policy states…’ and ‘One important thing to remember when you are booking…’?",
@@ -164,6 +169,23 @@ export const speakerNotes: Record<string, SpeakerNote> = {
       "Record the action offered, the member’s response, who owns the follow-up and when it is due.",
       "The next associate should be able to understand what happened and continue the conversation without asking the member to start again.",
       "Let’s make updating the record part of the same-day follow-up.",
+    ],
+  },
+  policy: {
+    script: [
+      "This section is the reference pack: the standing rules a member is most likely to ask you about during an induction.",
+      "You are not expected to recite it. You are expected to know where the line is, so your conversation can stay warm and accurate at the same time.",
+      "Start with the first visit. Fifteen minutes early, grip socks, waiver signed before entering any class \u2014 and the first experience differs by city, so check which one applies before you offer it.",
+      "The doors are the rule we never bend. Barre and Strength Lab lock at plus ten minutes, powerCycle at plus five. Say it once at the induction, warmly, with the reason: a late entry costs a safe set-up and costs the room its focus.",
+      "Cancellation is twelve hours for classes and twenty-four hours in writing for privates. Say it at the start of the relationship, not in the middle of a dispute.",
+      "Freeze requests go to the city email at least forty-eight hours ahead, and they extend validity one for one. Rollover is once per member, on approval \u2014 goodwill, never a promise at the point of sale.",
+      "Refunds: everything is strictly non-refundable, and a timely cancellation returns credit to the account. If a member quotes you a price you do not recognise, never match it on the spot \u2014 confirm, then come back.",
+      "Then the level ladder. Barre first, four classes before the extensions, and the Strength Lab on-ramp of the four-Barre base plus screening and onboarding. The ladder protects the member; short-circuiting it is the commonest cause of first-month dropout.",
+      "Know what runs where. Bengaluru has no powerCycle and no Strength Lab \u2014 offer FIT, HIIT and Back Body Blaze as the strength path rather than a promise we cannot keep.",
+      "On results, we are confident about the method and honest about the individual. Over eighty percent see visible results in as few as eight classes, four sessions a week to see real change, and results vary with attendance, sleep and starting point.",
+      "Health disclosures are captured at the waiver, tagged, and briefed to the Instructor before every session \u2014 and seen only by the Instructor and the Team Leader. We describe, modify and refer. We never diagnose.",
+      "Last, the words. Investment rather than cost, preferred rate rather than discount, introductory experience rather than trial class. And never the word Spinning \u2014 it is somebody else\u2019s trademark.",
+      "The one rule behind every line here: state it once, warmly, with the reason attached, then move to what we can do.",
     ],
   },
   cheat: {

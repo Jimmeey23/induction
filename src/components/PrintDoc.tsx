@@ -9,6 +9,7 @@ import { Module5, Module6 } from "./Modules5to6";
 import { Module7, Module8 } from "./Modules7to8";
 import { Module9, Module10 } from "./Modules9to10";
 import { CrmLoop, CheatSheet, NeverDo, Closing } from "./Toolkit";
+import { PolicyPack } from "./PolicyPack";
 
 const noop = () => {};
 
@@ -26,6 +27,7 @@ const PRINTABLE: { id: string; render: () => ReactNode }[] = [
   { id: "m9", render: () => <Module9 section={byId("m9")} go={noop} /> },
   { id: "m10", render: () => <Module10 section={byId("m10")} /> },
   { id: "loop", render: () => <CrmLoop section={byId("loop")} /> },
+  { id: "policy", render: () => <PolicyPack section={byId("policy")} /> },
   { id: "cheat", render: () => <CheatSheet section={byId("cheat")} /> },
   { id: "never", render: () => <NeverDo section={byId("never")} /> },
   { id: "close", render: () => <Closing section={byId("close")} go={noop} /> },
